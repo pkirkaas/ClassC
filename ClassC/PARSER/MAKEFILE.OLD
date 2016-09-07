@@ -1,0 +1,58 @@
+#Makefile for ClassC/Elaine
+
+# NOTES:
+# 1) The default make target (ceparser) will make files for the AT&T Unix PC
+#	This uses the shared library.  Note that the variable argument print
+#	routine "vfprintf" is not included in the AT&T 3.51 release of
+#	its shared library, so the local library "libvp.a" must be created
+#	with the object code for the "vfprintf" routine extracted from
+#	the standard libraries.
+#		A simpler alternative is selecting target "unshared";
+#	which should
+#	compile on all Sys V machines.  UCB systems will require some
+#	conversion of source files.
+#
+# 2) This makefile puts "ceparser" and "ce" into /usr/local/bin and
+#	"libce.o" and "libceO.o" into /usr/local/lib.  Change this
+#	if it is unsuitable.
+
+
+# LBS=- ly -ll -lg -lvp /lib/crt0s.o /lib/shlib.ifile
+LBS= -ll -lg -lvp /lib/crt0s.o /lib/shlib.ifile
+XLBS= -ll 
+ClassC:	ceparser libce.o
+
+ceparser:	y.tab.o lex.yy.o parse.o funcs1.o funcs3.o funcs2.o
+	ld parse.o y.tab.o lex.yy.o funcs3.o funcs2.o funcs1.o ${LBS} -o ceparser
+	cp ce ceparser ../bin
+
+unshared:	y.tab.o lex.yy.o parse.o funcs3.o funcs2.o funcs1.o libce.o
+	cc -g parse.o y.tab.o lex.yy.o funcs3.o funcs2.o funcs1.o ${XLBS} -o ceparser
+	cp ce ceparser ../bin
+funcs1.o:	funcs1.c
+	cc -cg  funcs1.c
+funcs2.o:	funcs2.c
+	cc -cg  funcs2.c
+funcs3.o:	funcs3.c
+	cc -cg  funcs3.c
+parse.o:	parse.c
+	cc -cg parse.c 
+
+y.tab.o:	y.tab.c common.h
+	cc -cg y.tab.c $(SWITCH)
+		
+lex.yy.o:	lex.yy.c  common.h
+	cc -cg lex.yy.c
+
+lex.yy.c:	r.l
+	lex r.l  
+
+y.tab.c:	ce.y 
+#	yacc -l -d ce.y
+	yacc -l -d -t -v ce.y
+
+libce.o:	libce.c
+	cc -cg -DDEBUG libce.c
+	cp libce.o ../bin/libceDB.o
+	cc -cO libce.c
+	cp libce.o ../bin

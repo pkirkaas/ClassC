@@ -1,0 +1,10 @@
+This directory contains the original thesis for ClassC and some other text.
+It was written for troff, with the AT&T "mm" macro set.  It was written
+in 1988, and hasn't changed much since.  The file "Thesis" includes
+all the sub modules of the thesis for printing.  See it to find the order
+of the various modules.
+
+
+Paul Kirkaas				 Sat May 26 11:22:15 PDT 1990
+kirkaas@cs.ucla.edu
+

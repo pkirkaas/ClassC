@@ -1,0 +1,46 @@
+    Mon Feb 29 00:12:51 PST 1988
+I have made some changes without trying to recompile and test them.  They
+are with regard to the way a member funtion will be compiled --
+it was just to automatically add "int self" to the argument list
+The idea is that each time a member funtion is called, it must pass
+not a structure pointer to itself, but rather the object itself.
+Otherwise we have the same problem as before with structure dereferences.
+The user will explicitly dereference components of the class inside the
+function definition, however.  That is, if the class CL has data member
+length, any manipulation to length within the definition of CL::Area()
+will have to be made by "self:>length".
+
+	Things still to do:
+	I think all the parsing worl I know about is done.  Of course,
+I will discover more.  I must add the library strings.  I have to
+clean up some little things like 
+a) Changing the automatic passing of structure reference in member
+	function calls to OBJECT passing.
+b) Eliminating the pointer to the objects dereferencing function
+	that is now automatically generated as part of the class
+	declaration.  That information will now be included in the
+	object table.
+That's all I can think of.  It's almost frightening.
+
+Tue Mar 22 14:25:56 PST 1988
+
+	Remember to take care of reference counting on objects that
+are formal parameters -- that is, if an object is passed as an argument
+to a function, it must be treated in a special way in assignments.
+
+
+	Modify parser so that "init" functions return sefl as the
+last action.  This to allow new to be impemented as
+
+object x = ClassName:>new (args);   translated to: 
+int x = _ClassName_init(_new(sizeof (struct ClassName)), args);
+
+
+Remeber to modify parser and LibFuncs for "new" -- must somehow
+include the approp. ref struct.
+
+Bear in mind that you can put an awful lot of stuff in "new" ( initialization
+etc.) by putting more infor in the _ref_el array.
+
+
+Make class dec's recursive!!!!! (include object of OWN class in class def)

@@ -1,0 +1,945 @@
+
+.ls 2
+
+1) Background -- Began by being interested in Object Oriented programming
+   Learn best by creating.
+
+2)    What is object oriented programming?
+
+3)	What does ClassC have/do?
+
+4)	How does it do it?
+
+
+I became interested in the concept of object oriented programming when I
+first arrived at RIT.  I had never heard of the concept before, but Dr
+Heliotis mentioned it briefly in class one day, and from that brief
+description, it seemed to offer a lot of promise for power and
+expressibility.  
+
+As I looked into the concept of Object Oriented Programming more deeply, I
+found that there seemed to be as many different definitions of the concept
+as there were writers writing about it.
+
+Furthermore, as I began working with some object oriented programming
+languages, I found that in the implementation of object oriented languages,
+few of them actually offered all of the features
+that were described theoretically.  Particularly, I was interested in 
+multiple inheritance, which seemed to me to offer a great deal of
+potential power.
+
+I worked especially with C++; AT&T's new object oriented version of the C
+programming language.  I liked working with this language for three reasons:
+
+1)	It provides many advanced object oriented programming features.
+
+2)	It is based on C, a language which I like a great deal because
+	of its simplicity, elegance, and power.
+
+3)	It is very fast.
+
+
+But again, as I worked with it some more, I found I was dissatisfied
+with certain aspects of the language.  It offered no type of multiple
+inheritance, and it didn't offer very good dynamic binding.  
+These characteristics are related, and I will be
+getting back to this later.
+
+At any rate, I realized that the best way to really learn about object
+oriented languages and get one that suited my needs was to design and
+implement one myself.  This is the motivation behind the development of
+ClassC/Elaine.
+
+Before going on, I should discuss a little bit more what is
+meant (at least, what I mean) by an object oriented language.
+
+Properly exploring what object oriented programming really means could be a
+thesis in itself.  This thesis is about ClassC/Elaine, so I
+will just give a sketchy description of object oriented programming here.
+
+There are three qualities which I think are essential to the idea of object
+oriented programming.
+
+1)	Data Abstraction
+
+2)	Dynamic Binding
+
+3)	Inheritance
+
+
+1)	Data Abstraction
+	Data abstraction basically means that the user of data doesn't need
+to know the details of how that data is implemented.
+A familiar example 
+typical of most programming languages is arithmetic operations on integers
+and real numbers.  Floating point numbers and integers are represented
+very differently in a computer, and very different action is taken to
+add 5 and 7 versus
+adding 5 and 7.2.  Yet the user is shielded from this --  appropriate action
+is taken by the computer and the results come out as expected.
+
+This type of data abstraction is hard wired into most object oriented
+programming languages.  Object oriented languages allow the user to 
+create his/her own new abstract data types.
+
+2)	Dynamic Binding
+	Binding is when you associate a symbol to what it really represents.
+In general, the earlier you do it, the cheaper it is, but the more you
+restrict yourself as well.
+Late binding is more expensive, but allows more flexibility.  
+
+Most conventional compiled languages bind a variable to a particular type at
+compile time.  That means that variables can only represent data of that
+particular type.  Object oriented languages should allow some degree of
+dynamic type binding -- at least to the extent that a variable can take on
+values of its declared type or types derived from that declared type.
+
+3)	Inheritance
+	Inheritance is the ability to define new data types as 
+subtypes or derivatives of previously defined types.  The new type 
+inherits all the properties and components of the old type, and
+adds new components of its own.
+
+-- Another characteristic which is often mentioned in connection with object
+oriented programming is \fB Information Hiding\fP.  Information hiding 
+means that the user should have no direct access to the raw data
+in the object --
+the only way to manipulate the object is through the message passing
+interface -- that is, through requests to the object.
+
+I don't find this to be a desirable characteristic.  However well
+designed an object or abstract data type is, I think there will always be
+occasions when you want to do something to an object that the object's
+designer had not foreseen.  Ultimately the decision on whether or not
+to enforce information hiding depends on the purpose of the language
+and the opinion of the implementor.  I chose to allow the user
+full access to the object data.
+
+
+
+What exactly does all this mean?
+How are these abstract properties realized in a programming language?
+
+In a traditional programming system, data exists and is passed to
+functions or procedures to be manipulated.  The data itself is passive -- it
+doesn't DO anything itself or to itself -- it is acted upon by external
+agents (subroutines, etc).
+
+In the object oriented model, the data is grouped together with the
+operations that can be performed on it in a single entity called an
+OBJECT.  The object, then, can be thought of as a collection of data and
+operations on that data.  To perform an operation on the data contained in
+an object, a request or a message is sent to the object; and the object
+itself is responsible for executing that request.
+
+Different objects may therefore respond individually to the same message or
+request.  The issuer of the request does not need to know how that request
+is being serviced.
+
+An example:  Suppose you have different shapes -- a cube, a sphere, a
+pyramid, etc.  These shapes could be represented by dimensions, etc.
+
+In a traditional programming language, if you have a variable X that
+represents one of these shapes and you want to find the volume of 
+that shape, you have to have know exactly what shape X represents.
+You have to have as many functions for determining volume as you
+have types of shapes, and then call the appropriate function for
+the particular shape X.
+
+In an object oriented system, there still must be these different ways of
+determining the volumes of the different shapes, but the user doesn't need
+to keep track of all of them all.  Each object is responsible for knowing
+what it is and for having a way to calculate its own volume.  Thus,
+the user doesn't need to know exactly what kind of shape X happens to be --
+the user just sends a request for volume to X, and X itself interprets the
+request, figures out its own volume, and returns the result.
+
+This is an example of data abstraction.
+
+This is the basic essential of object oriented languages, I think.
+That is, the ability of different objects to receive the same message
+but act on that message individually.  This is what distinguishes 
+object oriented languages from more conventional ones.
+
+What is ClassC?
+
+ClassC can be considered a C preprocessor, or a compiler whose object code
+is C.  It is can legitimately be considered a compiler because it
+is a LALR parser generated by YACC which fully parses the input code,
+maintains symbol tables with scoping information, etc.  
+
+Standard C expressions are accepted and usually output unchanged.
+	1) Assignment of object variables --
+	2) Statement / Declaration mixing --
+Expressions which implement features of ClassC are translated into 
+C code.  The C compiler is called on the result, and the ClassC runtime
+library routines are linked into the executable.  
+
+So what does ClassC do?
+
+
+  1) ClassC provides true multiple inheritance.
+
+  2) ClassC provides both strict type checking on objects
+as well as typeless dynamic binding -- a variable of type
+\fI object \fP may be assigned any class instantiation.
+
+  3) ClassC offers automatic garbage collection of memory no longer
+referenced by any object variables.
+
+How does ClassC do this?
+
+
+Objects and classes are implemented in ClassC through standard C structures.
+Structures in C are user defined data types which are composed of
+a combination of other simpler data types.
+A structure in C is defined as in figure 1.
+
+.DS
+struct Employee
+    {	int	ID;
+	char *	name;
+	struct date hireDate;
+		.
+		.
+		.
+    }	;
+
+.DE
+
+Each component of a structure is named and declared to be of a specific
+type.  As in the figure, previously defined structures can be components of
+other structures.  Functions cannot be structure components, although
+pointers to functions can.
+
+A class is defined in ClassC similarly, except functions are allowed as
+members, and a class can inherit components from an arbitrary set of
+ancestor classes.
+
+It is the arbitrary number of ancestor classes (multiple inheritance)
+that causes difficulty.
+
+To understand why this is a problem, we must first
+understand how C accesses structure components.  Structure component
+selection in C is done at compile time -- early binding.   For example,
+if x is a structure of type Employee, x.name selects the second component of
+x, irrespective of what that component really is.  This is okay if x really
+is an instance of type Employee, but not so good if the computer thinks
+x is of type Employee but is really another type altogether; or if the
+component "name" might be located in different positions for different
+instances of x.  Let's examine the problems of inheritance.
+
+Inheritance implies that all variables of an ancestor class should
+be able to represent members of a derived class.  Going back to our example
+of shapes --  there would presumably be a super class "SHAPE", of which
+subclasses "cube", "sphere", "pyramid", etc would be derived.  If we have
+a system which enforces a reasonable concept of type checking, a variable
+myShape would have to be declared to be of super type shape if it we want
+it to be able to represent spheres and pyramids and cubes.  This is the
+nice thing about inheritance -- it allows type enforcement with flexibility
+to represent different types of objects by a single variable of an ancestor
+type.  
+
+The assumption of inheritance is that each derived class adds additional
+features or components to the ancestor class.  
+
+.DS
+figure 2
+
+class Father
+    {	int	a;
+	int	b;
+    }	;
+
+
+class Son1 : Father
+    {	float	q;
+    }	;
+
+.DE
+
+This says that the class Son1 is derived from class Father -- that is, Son1
+has all the components that class Father does, plus an additional component,
+float q.
+
+Take the following example of figure 3
+
+.DS
+figure 3
+
+Father myFather;
+Son1	mySon;
+mySon.b = 5;
+myFather = mySon;
+print myFather.b;
+
+.DE
+This means that if a variable myFather is declared to be of type
+Father, we want it to be able to represent objects of class Son1 as well as 
+objects of class Father.  We want the expression myFather.b to represent the
+same component as the expression mySon.b.
+
+If we are content with simple single inheritance, this is fairly easily
+implemented in C by making sure that all the components of the
+derived class go after the components of its ancestor class.
+Thus the declaration of class Father above could be translated
+to figure 4 in C
+
+.DS
+figure 4
+
+struct Father
+    {	int	a;
+	int	b;
+    }	;
+
+.DE
+And the declaration of class Son1 translated as figure 5
+
+.DS
+figure 5
+struct Son1
+    {	int	a;
+	int	b;
+	float	q;
+    }	;
+
+.DE
+In both structures, the component "b" occupies the same relative position.
+Thus if the variables myFather and mySon both point to the same object
+(a Son1 object) the expressions myFather.b and mySon.b both access the same
+component, and all is well.
+
+This is not as easy with multiple inheritance.  Consider the 
+new classes Mother and Son2 in figure 6
+
+.DS
+figure 6
+
+class Mother
+    {
+	int	Y;
+	int	Z;
+    }	;
+
+
+class Son2 : Father : Mother
+    {
+	float	r;
+    }	;
+
+.DE
+
+How is Son2 translated into a C structure -- figure 7
+
+.DS
+figure 7
+
+
+Is it (A)
+
+struct Son2
+    {
+	int	a;	/* From Dad */
+	int	b;	/* From Dad */
+	int	Y;	/* From Mother */
+	int	Z;	/* From Mother */
+	float	r;
+    }	;
+
+or (b)
+
+struct Son2
+    {
+	int	Y;	/* From Mother */
+	int	Z;	/* From Mother */
+	int	a;	/* From Dad */
+	int	b;	/* From Dad */
+	float	r;
+    }	;
+
+.DE
+
+Either way you do it, structure dereferencing works for one ancestor and not
+the other.
+
+
+The issue becomes even more complicated if both Father and Mother
+have a component of the same name or if they themselves share a common
+ancestor.  For example, see figure 8  
+
+.DS
+figure 8  
+
+
+class UniversityMembers
+    {
+	char *	name;
+	int	DateOfBirth;
+	void	printStats();
+    }	;
+
+class Student : UniversityMembers
+    {
+	int	StudentID;
+   	float	GPA;
+	void	printStats();
+    }	;
+
+class Employee : UniversityMembers
+    {
+	int	EmployeeID;
+	int	Salary;
+	void	printStats();
+    }	;
+
+class GradAsst : Student : Employee
+
+.DE
+
+
+figure 9
+
+
+.ce
+UniversityMembers
+
+
+
+.ce
+Student			Employee
+
+
+
+.ce
+GradAsst
+
+
+Notice that GradAsst inherits the components of UniversityMembers twice--
+once from Student and once from Employee; yet we would like only one copy
+of those members (name and datOfBirth) to be included in the class
+GradAsst.  Thus, for the class GradAsst, the final C structure would
+be like the following figure 10:
+
+
+.DS
+figure 10
+
+struct GradAsst
+    {
+	char *	name;
+	int	dateOfBirth;
+	int	StudentID;
+   	float	GPA;
+	int	EmployeeID;
+	int	Salary;
+    }	;
+
+.DE
+This is a very difficult problem to handle with ordinary C
+structure dereferencing.  Variables of type Employee and Student would
+both expect to find DateOfBirth in the second position; but Student
+would expect float GPA in the fourth position; whereas Employee would
+expect Salary.  If you had a variable thisEmployee which was supposed to 
+be applied to both regular employees and graduate assistants, you
+would have a hard time finding out salaries without knowing whether the
+current instance of thisEmployee was a grad student or not.  This defeats
+much of the benefits of an object oriented system.
+
+This is why C++ currently offers only single
+inheritance, although I have heard that Dr Stroustrup, the creator of C++,
+is developing a multiple inheritance version.
+
+
+With ClassC, chose to do runtime symbolic component dereferencing.  That is, 
+I developed a method to access components by name rather
+than through a standard C structure dereference.  This is more
+expensive at run time, but allows greater flexibility and dynamic type
+binding.  It is this access method which is the key to the ClassC/Elaine
+system.
+
+A class in ClassC is declared as in the figure 11:
+
+.DS
+figure 11
+
+class Ship
+    {
+	int	size;
+	int	position;
+	int	move();
+    }	;
+
+
+.DE
+
+This results in the creation of a lot of C-code in the output file.
+The first thing that is done is to create an array of structures
+of type refel; where refel is defined as in the figure 12.
+
+.DS
+figure 12
+
+
+struct _ref_el
+    {
+	char * name; 
+	int offset; 
+    };
+
+
+.DE
+The array of refels is as in the next figure 13:
+
+.DS
+figure 13
+
+static struct _ref_el _ShipArr [] =
+    { 
+	{ "size",	(int)&((struct Ship * ) 0) ->size },
+	{ "position",	(int)&((struct Ship * ) 0) ->position },
+	{ 0 , 0 },
+	{ "_name" , (int)"Ship" },
+	{ "move",	(int) _Ship_move },
+	{  0 , 0 }
+    };	
+
+
+.DE
+Note that the array refel is divided into two sections; separated by the
+0,0 pair.  Each element in the first section of the refel array pairs
+a string to an integer offset within the structure "Ship"; which is
+illustrated later.  This is done by casting the integer 0 to a pointer to
+structure Ship; dereferencing a component of that structure; taking its
+address, and finally casting the result to an integer.  This is a
+complicated way of getting the relative offset of that component
+into the structure.  For example, the string "position" is paired with
+an integer that represents the offset of component "position" in the 
+structure "Ship".
+
+The class declaration itself is translated to the
+following C structure (figure 14):
+
+.DS
+
+figure 14
+
+struct Ship
+    {
+	struct _ref_el * _ref_arr;
+	int	size;
+	int	position;
+    }	;
+
+
+
+.DE
+Note that the member function "move()" is not represented in the 
+C structure; note also the component "ref_arr" which is a pointer
+to a structure of type _ref_el; or really, the base of the array of
+_ShipArr.
+
+
+The second portion of the array _ShipArr (that following the first
+paired {0,0}) pairs each member function name with a pointer to the
+location of that function in memory.  Thus the string "move" is
+paired to a pointer to the function _Ship_move().
+
+So how does all this fit together?
+
+A dereference in ClassC is written as in the figure 15
+
+.DS
+
+figure 15
+
+Ship	myShip;		/* myShip is declared to be an instance of Ship */ 
+myShip = Ship:>new();	/* myShip is initialized */
+myShip :> position = 75024;
+
+
+.DE
+where myShip is an instance variable (object) of class Ship.
+
+This is translated into the C as in the next figure 16
+
+.DS
+figure 16
+
+* (int *) _deref(myShip, "position") = 75024;
+
+.DE
+_deref() is a ClassC library function.  It is this function which does the
+runtime symbolic dereferencing of object components as follows:
+
+1)	myShip refers to a structure of type Ship.  The first
+	component of this structure is a pointer to the array
+	_ShipArr, as in the illustration above.  
+
+2)	_deref() searches this array for the string "position".  
+	It finds the string as the first component of the second
+	element of the array.
+
+3)	Paired with the string "position" is an integer offset.  
+	_deref adds this offset to the starting address of the
+	structure referred to by "myShip" and returns it.
+
+4)	The value returned by _deref is cast to an integer pointer,
+	and dereferenced.
+
+This is an elaborate way to return a value you would think you could
+get just by myShip.position in C; and indeed this system offers no
+benefit in the situation just described.  So let's expand on it a little
+bit.
+
+Define two new classes, StorageFacility and CargoShip, as in the figure 17
+
+.DS
+figure 17
+
+class StorageFacility
+    {
+	char *	contents;
+	int	capacity;
+	int	position;
+	int	load();
+    }	;
+
+class CargoShip : StorageFacility : Ship
+    {
+	char *	HomePort;
+    }	;
+
+.DE
+
+The generated C structure for the class CargoShip would be as the figure 18:
+
+.DS
+
+figure 18
+
+struct CargoShip
+    {
+	struct _ref_el * _ref_arr;
+	char *	contents;
+	int	capacity;
+	int	position;
+	int	size;
+	char *	HomePort;
+    }	;
+
+
+.DE
+Now, the variable myShip was declared to be an object or instance of
+class Ship; which means it should be able to refer to ANY kind of ship,
+including a CargoShip, since class CargoShip was derived from class Ship.
+
+But if we set myShip equal to an instance of type CargoShip, it now
+refers to a completely different structure than that of simple type Ship.
+In particular, if myShip were treated like a structure and dereferenced
+by myShip.position, it would return the third component of the structure
+to which it points, in this case the capacity of the CargoShip, rather
+than its position.
+
+myShip:>position, however, would result in a call to _deref().  _deref()
+then looks at the first component of the structure referred to by myShip.
+The first component of an object structure is always a pointer to the
+array of _ref_el's that pairs the names with the offsets for that class.
+
+It then searches that array, finds the offset for position and returns it
+as before.  Notice that the array pointed to by an instance of CargoShip is
+different from the array pointed to by an instance of simple type Ship.
+
+
+Object Table
+
+Lets backup a little now.  What exactly is an object variable?  I said
+it \fI refers\fP to an structure in C, but I didn't explain how it
+does that.  An object variable is really a C integer which is an index into
+a system wide object table.  This object table has a pointer to the 
+structure it represents in memory, a reference count field, a dirty flag
+(is the entry free), and a class field which identifies the class of which
+the object is an instance.  This table is discussed further when I
+discuss Garbage Collection.
+
+Member Functions
+
+How are member functions implemented?  Recall our discussion of shapes
+earlier.  We want to have several different classes of shapes, each of which
+calculates its own volume in its own way, but all of which respond to
+the same message "volume".  So if we have three different shapes, we
+need to write three different functions to calculate volume; but we
+want to be able to access each of those functions with a single message
+symbol.  How do we do this?
+
+Consider three classes -- Cube, Sphere, and Pyramid.  They are declared
+as in the figure 19:
+
+.DS
+
+figure 19
+
+class Shape
+    {
+	int volume();
+    }	;
+
+
+class Cube : Shape
+    {
+	int	lengthOfSide;
+	int	volume();
+    }	;
+
+class Sphere : Shape
+    {
+	int	radius;
+	int	volume();
+    }	;
+
+class Pyramid : Shape
+    {
+	int	height;
+	int	lengthOfBase;
+	int	volume();
+    }	;
+
+
+
+.DE
+
+We now create the volume calculation functions for each of our
+three shapes as in the following figure 20.
+
+.DS
+figure 20
+int Cube::volume()
+{ return lengthOfSide * lengthOfSide * lengthOfSide ; }
+
+int Sphere::volume()
+{ return 4 * 3.14159 * radius * radius * radius / 3; }
+
+int Pyramid::volume()
+{ return height * lengthOfBase * lengthOfBase / 4 ; }
+
+
+.DE
+
+When compiled by the ClassC parser, these three functions become
+translated as follows in the figure 21
+
+.DS
+
+figure 21
+
+
+int _Cube_volume(self)  int self;
+{ return (*(int  *)_deref(self, "lengthOfSide")) *
+         (*(int  *)_deref(self, "lengthOfSide")) *
+         (*(int  *)_deref(self, "lengthOfSide")) ;
+}
+
+int _Sphere_volume(self)	int self;
+{
+	.
+	.
+	.
+}
+
+etc.
+
+
+.DE
+
+The refel array for Cube, for example, is as in the following figure 22:
+
+.DS
+
+figure 22
+
+static struct _ref_el _CubeArr [] =
+    { 
+	{ "lengthOfBase",	(int)&((struct Cube * ) 0) ->lengthOfBase },
+	{ 0 , 0 },
+	{ "_name" , (int)"Cube" },
+	{ "volume",	(int) _Cube_volume },
+	{  0 , 0 }
+    };	
+
+
+.DE
+So if an object variable myShape of class Shape is declared and assigned
+to an instance of class Cube, the message "volume" sent to myShape
+via myShape:>volume(); will result in the array _CubeArr above being
+searched for the name volume, which is paired with a pointer to the 
+function _Cube_volume.  The same message "volume" sent to an instance
+of Sphere would search the refel array "_SphereArr" and use the 
+string "volume" to find a pointer to the function "_Sphere_volume".
+
+Type Enforced vs. untyped
+.br
+There are two ways to declare object variables in ClassC.
+
+Declaration by class name --
+.br
+Classes defined as above can be used to declare object variables.  An object
+variable declared by a class name can only be used to represent objects of
+that class or descendants of that class.  For example, from the previous
+discussions, a variable declared to be of class "Ship" could represent
+objects both of type "Ship" and type "CargoShip"; but not objects of
+class "StorageFacility".
+
+Declaration by keyword "object" --
+
+Object variables can also be declared by the keyword "object"; which is a
+new reserved word / type name in ClassC.  Variables declared by "object"
+can be used to represent objects of any class.  This can be useful
+when the type of object you want to represent is not known before hand --
+for example, in the design of collection classes -- lists or sets.
+In C++, for example, you can't just design a class "List";
+you have to design it as a class ListOfSomething.  You can't have a
+heterogeneous list; that is, a list of objects of different classes.
+All the objects in a C++ list have to be of a single class or derived from
+that single base class.  
+
+This is not such a terrible disadvantage.  Frequently the fact that you can
+design a list that accepts derivatives of the the base class as well as
+objects of the base class itself allows you to have a list that offers a
+sort of heterogenaity that is sufficient for many applications.
+
+Sometimes, however, this may not be enough.  We may wish to manipulate
+objects with no \fIa priori\fP knowledge about their class at all.
+In this case, we can use variables declared to be of type "object".
+We can design lists of objects, sets of objects; etc.
+
+There is a difficulty.  In other object oriented systems that provide this
+ability; Smalltalk, for example, EVERY entity in the environment is an
+object.  ClassC adds objects and classes on top of the existing structure
+of C; so objects and integers and pointers, etc must all co-exist.
+This can be a source of difficulty when dereferencing a variable of type
+"object".
+If we declare the variable "genericObject" as type "object",
+it can represent instances of any class at all.
+Therefore, there is no way for the compiler to know the type of
+genericObject's components.  The default, therefore, is that objects
+declared to be of type "object" return type object components.  Since this
+is not always the case, the programmer has two options.
+
+When the programmer dereferences an object, he/she presumably know what type
+of component to expect, even if the compiler does not.  Therefore, the
+programmer can instruct the compiler to expect a return value of any
+specified type by an expression similar to a standard C cast.  For example,
+if the expected component type of an object variable "Board:>field"
+is an eight by eight array of integers, the appropriate dereference is as in
+the figure 23:
+
+.DS
+
+figure 23
+
+board:> (int [8][8]) field
+
+.DE
+which gets converted by the compiler to the following figure 24 in C:
+
+.DS
+
+figure 24
+
+* (int * [8][8] ) _deref(board, "field")
+
+
+.DE
+
+This solution is often the simplest, but is bad programming style because
+the programmer is responsible for knowing the type of the object and its
+expected return types.  This is exactly the sort of thing that object
+oriented programming was intended to replace.  So a more formal way of
+manipulating untyped object variables is to query them.  The expression
+in the figure 25
+
+.DS
+
+figure 25
+
+objectVariable:>_name
+
+
+.DE
+will return a string containing the name of the class of which that object
+is an instance.  The user can then use that knowledge to manipulate the
+object appropriately.
+
+In any case, the use of untyped object variables is awkward.  In some cases
+it may be necessary or desirable to use this feature, but in general it will
+be far more practical to use the first described named class object variables.
+
+
+Garbage Collection -- What is it?
+
+First, I must reemphasize the difference between objects and object
+variables.  Object variables, as I indicated before, are really integer
+indices into an object table.  An object variable only ever takes up
+a single word of memory.  The object to which an object variable
+refers, however, is allocated from the heap and may be arbitrarily large.
+Usually, one object variable refers to one object in heap, and that's that.
+It is possible, however, for several object variables to point to the same
+object, or for NO object variables to point to a particular object.
+It is this last case which can cause trouble, because when we have an object
+with no object variables pointing to it, we have no way of referencing it or
+doing anything with it again.  It just sits there in memory forever, taking
+up space and doing nothing.  Garbage collection is the process of going
+through all the object on the heap, finding those "floating" objects that
+no longer have any references to them, deleting them, and releasing
+their memory back to the heap to be used again by new objects.
+
+
+This is a nice feature, but it is difficult to implement, involves a lot of
+run time overhead, and frequently un-necessary.  Many object oriented
+languages provide Garbage Collection (Smalltalk and Owl); many do not
+(C++ and Objective C).  
+But since no other C based object oriented system I know
+of does provide automatic garbage collection, I decided
+to try and develop such a system and offer it as an option that can be
+selected at compile time.  
+
+I implement the ClassC garbage collection mechanism through reference
+counting.  In the object table, there is a reference count field.
+Every time an object is assigned to an object variable, the reference
+count of the object the object variable \fI used \fP to point to is
+decremented, and the reference count of the object which has just been
+reassigned is incremented.
+
+Assume a,b & c are object variables.  Without the garbage collection option
+selected, the expression a=b in classC is translated directly as a=b in the
+C output file.  With garbage collection, however, the expression a=b is
+translated as in the figure 26:
+
+.DS
+
+figure 26
+
+* _decref (&a ) = _incref (b)
+
+
+.DE
+This is to allow the return value of the function _decref to produce an lvalue.
+
+Cascaded assignment like a=b=c is translated as in the figure 27
+
+.DS
+
+figure 27
+
+*_decref( &a ) = _incref (* _decref (&b ) = _incref (c) )
+
+
+.DE
+Whenever a new object is created, a counter is incremented.  At every
+hundred ticks of the counter (that is, after each hundred new objects
+are created) the object table is garbage collected -- that is, it is
+traversed by the Elaine library function _collect() and all objects with
+zero reference count are free back to the heap.
+
+
+That is the essence of the ClassC/Elaine system.

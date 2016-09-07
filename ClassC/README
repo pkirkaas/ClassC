@@ -1,0 +1,32 @@
+ClassC/Elaine --- Copyright 1988 by Paul Kirkaas
+
+ClassC/Elaine is an object oriented C based language.  It is a full superset
+of C, barring only Enumerated types.
+
+ClassC is similar to C++ and Objective C in that objects are implemented in
+C structures.  
+
+ClassC is different from C++ and Objective C in that it is somewhat slower,
+but more object oriented.  The runtime system offers true dynamic binding
+of objects, true multiple inheritance, and other features.  It differs also
+in that it is not a finished commercial product, and has lots of rough
+edges.   However, it does work; quite nicely, I think.
+
+I developed this language for my Masters Thesis at the Rochester Institute
+of Technology, where it has subsequently been used in classes teaching
+object oriented programming.
+
+The documentation is mainly in the form of my original MS thesis,
+in the directory ./MSthesis.  The source for the parser is in the
+directory ./parser.  The ClassC compiler takes ClassC source code and
+translates it to standard (not ANSI) C, then calls cc to compile it.
+
+The code is ugly to the extreme, but if you can make it through, I
+think you will find some interesting uses of C, and a very interesting
+implementation of Classes and Objects in C.
+
+Let me know if you have any feedback.
+
+--
+Paul Kirkaas
+kirkaas@cs.ucla.edu

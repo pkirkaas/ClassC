@@ -1,0 +1,22 @@
+
+.H 3 "Object Deletion"
+Each class may have a delete function defined for it as a member
+component --
+
+.DS
+class String
+	{ char * memLoc;
+	  void delete();
+		...
+	};
+.DE
+.ls 2
+
+This delete function may be called explicitly--
+
+.I "myString:>delete();"
+
+The expression 
+.I "myString:>delete();"
+will result in a call to the library function "_delete(myString);"
+

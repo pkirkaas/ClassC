@@ -1,0 +1,638 @@
+.H 1 "Appendicies -- Sample ClassC Programs"
+
+.H 2 ChessMovs.e  -- Chess Move Generator
+
+.ls 1
+.na
+.nf
+/********************************************************************
+ *        ChessMovs.e -- Written in ClassC by Paul Kirkaas --
+ *
+ *        ChessMovs shows all legal chess moves for any given
+ *        chess board configuration.
+ *        The chess board and each piece are objects.  The pieces
+ *        examine the board and the other pieces on it, and generate
+ *        their own legal moves based on their information about themselves
+ *        and the state of the board.
+ **********************************************************************/
+
+#include "List.h"
+class Board
+{  Piece square[8][8];  // array of Pieces
+   display();
+   setup();
+   char  sect[8][8][9];
+   object moves; // Set of moves -- gets set/initialized by the piece
+   void add();
+   delete();
+};
+class Pos { int x;
+            int y;
+            char * eval();
+            object copy();
+           };
+class Piece
+{
+  object pos; /* position object, of class Pos */
+  char colr;
+  void showmoves();
+  object genmoves(); /* Returns an object of class Set, of moves */
+  char* eval();
+  delete();
+  init();
+  char id();
+ };
+object Piece::genmoves() {}
+char Piece::id() {}
+class Rook : Piece
+{
+ char id();
+ object genmoves(); /* Returns an object of class Set, of moves */
+ object Vmoves();
+ };
+class Bishop : Piece
+{char id();
+ object genmoves();
+ object DiagonalMoves();
+ };
+
+
+class Queen : Rook : Bishop
+
+// An example of multiple inheritence -- the queen has characteristics of
+// both the rook and bishop.
+
+{char id() ;
+ object genmoves();
+ };
+
+extern Board board;
+Board::delete()
+{ int i,j;
+  for ( i=0; i < 8; i++) for ( j=0; j < 8; j++) square[i][j]:>delete();
+  moves:>delete();
+}
+
+
+Board::init()
+  {
+   int i,j;
+   for (i=0; i<8; i++) for (j=0;j<8;j++)square[i][j] = 0;
+  }
+void Board::add(pP, i, j) Piece pP; int i,j;
+{square[i][j] = pP;}
+Board::display()
+{ setup();
+  char line[99];
+  strcpy(line,
+        "_________________________________________________________________\n");
+  printf("[H%s",line); // Go Home & draw 1st line.
+  int i,j;
+  for (j=0;j<8;j++)
+     {
+     for (i=0;i<8;i++) printf("|%s",sect[i][7-j]);
+     printf("|\n%s",line);
+     }
+};
+
+Board::setup()
+  { int i,j;
+    for(i=0;i<8;i++) for (j=0;j<8;j++)
+      { strcpy (sect[i][j],"       ");
+        if (square[i][j])
+          {
+            sect[i][j][1] = square[i][j]:>colr;
+            sect[i][j][3] = (square[i][j]):>id();
+          }
+      }
+    if (moves)
+    {
+    moves:>rewind();
+    while (moves:>place)
+       { sect[moves:>current():>(int)x][moves:>current():>(int)y][5] = 'X';
+        moves:>next();
+       }
+    }
+  };
+
+/***********************************************************************/
+
+char * Pos::eval()
+{static char  PosEvalRet[2][99];
+ static int ix = 0;
+ ix = !ix;
+ sprintf(PosEvalRet[ix],"Pos:x=%d; y=%d :: ",x,y);
+ return PosEvalRet[ix];
+}
+object Pos::copy()
+{ object retobj = Pos:>new();
+  retobj:>(int)x = x;
+  retobj:>(int)y = y;
+  return retobj;
+}
+Piece::delete() { pos :> delete(); }
+Piece::init(cl,x,y)char cl;int x; int y ;
+  {
+   pos = Pos:>new();
+   colr = cl;
+   extern object board;
+   board:>add(self,x,y);
+   pos:>(int)x=x;
+   pos:>(int)y=y;
+}
+
+char* Piece:: eval()
+    {char outS [2][99];
+     static int ix = 0;
+     ix = !ix;
+     sprintf(outS[ix]," Piece:: %c [%d,%d]\n",colr,
+                pos:>(int)x,pos:>(int)y);
+     return outS[ix];
+    }
+
+void Piece::showmoves(){// HERE IS WHERE WE NEED GARBAGE COLLECTION
+                    board :> moves  =genmoves();
+                    board :> display();
+                  };
+
+char Rook::id() {return 'R';};
+
+object Rook::genmoves()
+{ return Vmoves();}
+
+object Rook::Vmoves()
+{ Pos tstpos;
+  object pieceP=0;
+  object moves = Set:>new();
+  tstpos = pos:>copy();
+
+// Rook movement in Positive x direction.
+
+  for ( (tstpos:>x) = pos:>(int)x+1;
+        (tstpos:>x) < 8; (tstpos:>x)++)
+     { pieceP =(board:>square[tstpos:>x][tstpos:>y]);
+      if (pieceP)
+        { if (pieceP:>(char)colr != colr) moves:>add(tstpos:>copy());
+          break;
+        }
+      moves:>add(tstpos:>copy());
+     }
+
+tstpos = pos:>copy();
+// Rook movement in Negative x direction.
+
+  for ( (tstpos:>x) = pos:>(int)x-1;
+        (tstpos:>x) >= 0; (tstpos:>x)--)
+     { pieceP =(board:>square[tstpos:>x][tstpos:>y]);
+      if (pieceP)
+        { if (pieceP:>(char)colr != colr) moves:>add(tstpos:>copy());
+          break;
+        }
+      moves:>add(tstpos:>copy());
+     }
+
+
+// Rook movement in Positive Y direction.
+
+tstpos = pos:>copy();
+  for ( (tstpos:>y) = pos:>(int)y+1;
+        (tstpos:>y) < 8; (tstpos:>y)++)
+     { pieceP =(board:>square[tstpos:>x][tstpos:>y]);
+      if (pieceP)
+        { if (pieceP:>(char)colr != colr) moves:>add(tstpos:>copy());
+          break;
+        }
+      moves:>add(tstpos:>copy());
+     }
+
+// Rook movement in Negative Y direction.
+tstpos = pos:>copy();
+
+  for ( (tstpos:>y) = pos:>(int)y-1;
+        (tstpos:>y) >= 0; (tstpos:>y)--)
+     { pieceP =(board:>square[tstpos:>x][tstpos:>y]);
+      if (pieceP)
+        { if (pieceP:>(char)colr != colr) moves:>add(tstpos:>copy());
+          break;
+        }
+      moves:>add(tstpos:>copy());
+     }
+
+return moves;
+}
+
+/***********************************************************************/
+
+object Bishop::genmoves()
+{ return DiagonalMoves(); }
+
+char Bishop::id() {return 'B';};
+
+/***********************************************************************/
+
+object Bishop::DiagonalMoves()
+{ object tstpos;
+  object pieceP;
+  object moves = Set:>new();
+  tstpos = pos:>copy();
+/* Generate diagonal move for Bishop in Positive X & Positive Y */
+  for ( (tstpos:>(int)x) = pos:>(int)x+1,(tstpos:>(int)y) = pos:>(int)y+1;
+        ((tstpos:>(int)x) < 8) && ((tstpos:>(int)y) < 8);
+        (tstpos:>(int)x)++, (tstpos:>(int)y)++)
+     { pieceP =  board:>square[tstpos:>x][tstpos:>y];
+      if (pieceP)
+        { if (pieceP:>(char)colr != colr)  moves:>add(tstpos:>copy());
+          break;
+        }
+      moves:>add(tstpos:>copy());
+     }
+
+
+tstpos = pos:>copy();
+/* Generate diagonal move for Bishop in Negative X & Negative Y */
+
+  for ( (tstpos:>(int)x) = pos:>(int)x-1,(tstpos:>(int)y) = pos:>(int)y-1;
+        ((tstpos:>(int)x) >= 0) && ((tstpos:>(int)y) >= 0);
+        (tstpos:>(int)x)--, (tstpos:>(int)y)--)
+     { pieceP =  (board:>square[tstpos:>(int)x][tstpos:>(int)y]);
+      if (pieceP)
+        { if (pieceP:>(char)colr != colr)  moves:>add(tstpos:>copy());
+          break;
+        }
+      moves:>add(tstpos:>copy());
+     }
+
+
+/* Generate diagonal move for Bishop in Negative X & Positive Y */
+tstpos = pos:>copy();
+  for ( (tstpos:>(int)x) = pos:>(int)x-1,(tstpos:>(int)y) = pos:>(int)y+1;
+        ((tstpos:>(int)x) >= 0) && ((tstpos:>(int)y) < 8);
+        (tstpos:>(int)x)--, (tstpos:>(int)y)++)
+     { pieceP =  (board:>square[tstpos:>(int)x][tstpos:>(int)y]);
+      if (pieceP)
+        { if (pieceP:>(char)colr != colr)  moves:>add(tstpos:>copy());
+          break;
+        }
+      moves:>add(tstpos:>copy());
+     }
+
+
+/* Generate diagonal move for Bishop in Positive X & Negative Y */
+tstpos = pos:>copy();
+  for ( (tstpos:>(int)x) = pos:>(int)x+1,(tstpos:>(int)y) =
+                pos:>(int)y-1;
+        ((tstpos:>(int)x) < 8) && ((tstpos:>(int)y) >= 0);
+        (tstpos:>(int)x)++, (tstpos:>(int)y)--)
+     { pieceP =  (board:>square[tstpos:>(int)x][tstpos:>(int)y]);
+      if (pieceP)
+        { if (pieceP:>(char)colr != colr)  moves:>add(tstpos:>copy());
+          break;
+        }
+      moves:>add(tstpos:>copy());
+     }
+return moves;
+};
+
+
+
+/***********************************************************************/
+char Queen::id() {return 'Q';}
+
+object Queen::genmoves()
+{ object Rmoves;
+  object Bmoves;
+  Rmoves = Vmoves();
+  Bmoves = DiagonalMoves();
+  Rmoves:>merge(Bmoves);
+  return Rmoves;
+}
+/***********************************************************************/
+Board board;
+
+main()
+{
+    free(malloc (1000000));
+    system("clear");
+    board = Board:>new();
+    // Place a piece on the board by declaring it and positioning it as follows:
+    object WhiteRook = Rook:>new ('w',4,5);
+    object BlackRook = Rook:>new('b',5,5);
+    object WhiteBishop = Bishop:>new ('w',2,3);
+    object WhiteQueen = Queen:>new ('w',2,5);
+    /*
+    int i;
+    for (i=0; i<100; i++)
+    */
+    while(1)
+    {
+        // Each piece will generate its legal moves if so requested:
+        WhiteRook:>showmoves();
+        WhiteQueen:>showmoves();
+        // WhiteBishop:>showmoves();
+    }
+}
+
+.bp
+
+
+
+/********************************************************************
+ *        List.e -- Written in ClassC by Paul Kirkaas --
+ *
+ *        "List.e" creates and defines the abstract data type "list"
+ *        for use in the ChessMovs.e program
+ **********************************************************************/
+
+
+#include "List.h"
+
+eqv(a,b) object a,b; /* Compares the eval() strings of the two objects
+                      * and returns 1 if they are equivalent; else 0 */
+{ return !(strcmp (a:>eval(), b:>(char *) eval())); }
+
+char * ListElement::eval() { return self:>entry:>(char *)eval(); }
+
+List::delete()
+{
+    head:> delete();
+    place:>delete();
+}
+
+ListElement::delete()
+{
+    nextElement:>delete();
+    entry:>delete();
+}
+
+
+void Set::add(obj) object obj;
+{ self:>rewind();
+  object temp;
+  while (temp = current())
+    {
+       if (eqv(temp, obj)) return;
+       next();
+    }
+  ListElement newel = ListElement:>new ();
+  newel:>entry = obj;
+  newel:> nextElement = self:>head;
+  head = newel;
+}
+
+void Set::remove(obj) object obj;
+{
+  object x;
+  rewind();
+  while (place)
+  {  if (eqv (current(),obj)) // The current entry does match obj
+        { if (x) // If the previous link is !0;ie, if self is not first element
+            { x:>nextElement = place:>nextElement;
+              place = x:>nextElement;
+            }
+          else  // The object was the FIRST element of the list
+            { head = place:>nextElement;
+              place = head;
+            }
+         }
+      else  // The current entry does not match obj --
+         { x =  place;
+            next();
+          }
+
+    }
+}
+void Set::merge(set) object set; /* merge two sets */
+{ set:>rewind();
+  object temp;
+  while ( temp = set:>current() )
+        { add(temp);
+          set:>next();
+        }
+}
+
+int List::init()
+{ head = 0;
+  place = 0;
+}
+
+
+object List::current()
+{ if ( place) return place:>entry;
+  return 0;
+}
+void List::next()
+{ if (place)
+    place = place:>nextElement; }
+
+void List::rewind() {place =  head; }
+
+void List::add(obj) object obj;
+{ ListElement newel = ListElement:>new ();
+  newel:>entry = obj;
+  newel:> nextElement = head;
+  head = newel;
+}
+
+void List::remove(obj) object obj;
+{
+  object x;
+  rewind();
+  while (place)
+  {  if (  place :> entry == obj) // The current entry does match obj
+        { if (x) // If the previous link is !0;ie, if self is not first element
+            { x:>nextElement =  place:>nextElement;
+                place = x:>nextElement;
+            }
+          else  // The object was the FIRST element of the list
+            {   head =  place:>nextElement;
+               place =   head;
+            }
+         }
+      else  // The current entry does not match obj --
+         { x =  place;
+             next();
+          }
+
+    }
+}
+
+.bp
+
+
+/********************************************************************
+ *        List.h -- Written in ClassC by Paul Kirkaas --
+ *
+ *        List.h contains the declarations for the class "list"
+ *        which is used in "ChessMovs" and defined in "List.e"
+ **********************************************************************/
+
+
+class ListElement
+{ object entry;
+  ListElement nextElement;
+  delete();
+  char * eval ();
+};
+
+class List
+{ ListElement head;
+  ListElement place;
+  object current();
+  void next();
+  void rewind();
+  void add();
+  void remove();
+  int init();
+  delete();
+};
+
+class Set : List
+{ void add();        /* Only adds if equiv object not already in set */
+  void remove(); /* Compares by eval string (eqv()); not object # */
+  void merge();  /* Combines two sets in one */
+};
+
+.bp
+
+.H 2 Backprop.e -- A Neural Network Simulation Program
+.na
+.nf
+
+/***********************************************************************
+ *        Backprop.e -- written in ClassC by Paul Kirkaas
+ *        Neural Network simulation program:
+ *        Learns exclusive OR through trial and error.  Output reports the
+ *        percentage error after each set of one hundred test cases.
+ ***********************************************************************/
+#include <stdio.h>
+#define NO_RUNS 100000
+#define NO_PER_SET 100
+#define outfile "backprop.rslt"
+double exp();
+FILE * outFP;
+double c = .5;
+class Neuron
+{
+  Neuron to[10];
+  Neuron from[10];
+  double w[10];
+  double q;
+  double delta;
+  init();
+  forward();  /* Applies weights to inputs & generates output */
+  back();     /* Examines its given deltas & sends back */
+};
+
+double drand48();
+
+int cycle = 0;
+main()
+{
+  Neuron A0 = Neuron:>new();
+  Neuron A1 = Neuron:>new();
+  Neuron A2 = Neuron:>new();
+  Neuron A3 = Neuron:>new();
+  Neuron A4 = Neuron:>new();
+  Neuron A5 = Neuron:>new();
+  connect(A0,A3);
+  connect(A0,A4);
+  connect(A0,A5);
+  connect(A1,A3);
+  connect(A1,A4);
+  connect(A2,A3);
+  connect(A2,A4);
+  connect(A3,A5);
+  connect(A4,A5);
+  srand48(time(0) * getpid());
+  int test_pattern;
+  for(cycle =0; cycle < NO_RUNS; cycle++)
+  {
+    test_pattern = input(A0,A1,A2);
+    A3:>forward();
+    A4:>forward();
+    A5:>forward();
+    analyze(test_pattern,A5);
+    A5:>back();
+    A4:>back();
+    A3:>back();
+  }
+}
+
+analyze(pat,nron) int pat; Neuron nron;
+{int des =  ((pat & 1) || (pat & 2)) && (!((pat & 1) && (pat & 2))) ;
+ double result = nron:>q;
+ double error = (des ? (.9 - (double)result) : ((double)result - .1));
+ if (error < 0.) error = 0.;
+ static double cum_err = 0;
+ cum_err += error;
+ if (! (cycle % NO_PER_SET))
+   {
+    printf("%d\t:\t %f %% error\n",cycle,cum_err);
+    cum_err = 0;
+   }
+ nron:>delta += (des - result)* result * (1 - result);
+ c = 2*error + .3;
+}
+
+connect(obA,obB) Neuron obA,obB;
+{ int i = 0;
+  for (i=0; i<10; i++)
+    { if (! (obA:> to[i]))
+        { obA:> to[i] = obB;
+          break;
+        }
+    }
+
+  for (i=0; i<10; i++)
+    { if (! (obB:> from[i]))
+        { obB:> from[i] = obA;
+          break;
+        }
+    }
+}
+
+Neuron::init()
+{ int i;
+  for (i = 0 ; i < 10; i ++) w[i] = drand48()-.5;
+}
+
+double f(net) double net;
+{ return 1/(1 + exp( -net));}
+Neuron::forward()
+// Examines its input, decides on its output
+{
+ int i;
+ double q = 0;
+ double net = 0;
+ for (i = 0; i < 10; i ++)
+     {if (! from[i]) break;
+      net += w[i] * from[i]:>q;
+     }
+ q = f(net);
+}
+
+Neuron::back()
+// Computes its weight changes and the delta for the previous units
+{
+ int i;
+ double my_delta = delta;
+ delta = 0;
+ double her_q = 0;
+ double my_q = q;
+ for (i = 0; i < 10; i ++)
+     {  if (! (from[i])) break;
+        her_q = from[i] :> q;
+        /* First calculate her_delta, becuase it is based on CURRENT weights*/
+        /* Use "+=" for the delta, because in the general case, additive */
+        from[i]:>delta += my_delta*w[i]*her_q*(1-her_q);
+        /* Now calculate weight changes */
+        w[i] += c*my_delta*her_q; }
+}
+input (ob0,ob1,ob2) Neuron ob0,ob1,ob2;
+{
+  int pat = 4 * drand48();
+  ob0:>q = (double)1;
+  ob1:>q = (double) (!!(pat&1));
+  ob2:>q = (double) (!!(pat&2));
+  return pat;
+}

@@ -1,0 +1,9 @@
+1) Classes -- No other classes, structures or typedefs may be defined WITHIN 
+	a class definition.
+
+2) Usage -- Class definition like a typedef -- "class" keyword used 
+	only on definition -- Then the defined class name used like a
+	new type name.  This means, of course, that unlike structures, 
+	you cannot have a variable with the same name as a class.
+
+3) No unamed classes -- unlike structs --

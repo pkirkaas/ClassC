@@ -1,0 +1,653 @@
+\section{Functional Specification --- ClassC/Elaine Programming Guide}
+\subsection{Introduction to ClassC/Elaine}
+ClassC is an object oriented programming language based on
+{\em C},
+and it is assumed the user has a both a solid knowledge of the C
+language and a conceptual understanding of object oriented programming.
+
+Like C++ and ObjectiveC, ClassC is really a preprocessor, converting ClassC
+source code into C, then into assembly language, and finally into machine
+code.  ClassC is a superset of the C language, and all C constructs except
+{\em enum} are accepted and semantically unchanged ({\em enum}
+was not implemented because it differs from other aggregate types.  It would
+require a special symbol table, and is not widely used in C.  It would
+be a tedious but not difficult feature to add).
+
+{\flushleft ClassC/Elaine has the following features:}
+
+{\flushleft \large \em ClassC's object oriented extensions to C:}\\
+\begin{description}
+\item[Class Definition:]
+A class is defined like a C structure, except that it may inherit
+components from an arbitrary list of ancestor classes, and may include
+functions as components.
+\item[Objects:]
+An instance of a class as defined above is an
+{\em object}.
+Objects can be declared in one of two ways.  A class definition is like a
+typedef in C.  This means that a variable can be declared by using
+a class name as a type declaration.  Variables so declared can only be
+assigned objects of that same type or ancestor types.
+In addition, a new data type
+{\em object}
+is introduced, which can be used to declare variables which represent
+{\em any}
+class type.
+\item[Optional Inline Object Dereferencing:]
+Invoking the {\bf ce} compile command with the option {\bf -i} compiles
+the ClassC code with inline rather than funtion-call object dereferencing.
+The mechanism is explained in the Implementation section, but the
+effect of inline dereferencing is software that runs faster when it runs at
+all, but uses such subtle tricks of the underlying C compiler
+that it is not guaranteed to be reliable.  Use of the standard function
+dereferencing mechanism is generally recommended.
+\item[Garbage Collection Option:]
+Invoking the {\bf ce} compile command with the option {\bf -G} results in the
+inclusion of the ClassC garbage collection mechanism.
+\end{description}
+
+{\flushleft \large \em ClassC's non-object oriented extensions to C:}
+\begin{description}
+\item[Inline Comments:]
+Following C++, any text between ``//'' and the newline is ignored.
+\item[Statement/Declaration Mixing:]
+Statements and variable declarations can be intermixed in the body of a block,
+as long as each variable is declared before its use.
+\end{description}
+
+The distinction between classes, objects, and object variables
+in ClassC should be understood.
+A class type definition is used to define the valid data
+components and operations (methods, messages) for objects of that class.
+An object is an instance of a particular class,
+created dynamically from the heap at runtime by explicit calls to
+{\em $<$className$>$ :$>$ \tt new()}.  An object
+{\em variable}
+is implemented as an integer index into an object table.  Since the type
+(class) of each object is kept in its object table entry, it need not be a
+characteristic of the object variable itself.  This allows dynamic binding of
+object variables to objects.
+
+In other C based object
+oriented languages, the type of the object variable must be declared to be
+of a specific class, and can be used represent only objects of that
+particular class, or classes derived from that class.  In ClassC, type
+checking is performed only on those objects declared to be of a particular
+class.  The declaration
+{\em object}
+can be used as a catch-all to hold any system object type with no
+compatibility checking.  This is useful for collection classes such as
+sets which should be able to contain all object types.
+
+\subsection{Overview}
+This section introduces the flavor of programming in ClassC.  More detailed
+explanations can be found in the following sections.
+
+Objects in ClassC are much like structures which can have function components.
+The ``:>'' operator is used to dereference a component of an object.  If the
+component is a data/variable type component, it can be used as an l-value ---
+that is, it can appear on the left side of an assignment expression.  There
+is no concept of ``private'' components in ClassC.
+
+A function component in ClassC is like a message in Smalltalk.
+Messaging could have been implemented with a Smalltalk-like syntax, but
+one goal of ClassC was to be as C-like as possible while providing object
+oriented extensions.  Hence, messages arguments are passed like regular
+function arguments in C.  Thus the expression:
+\begin{quote} \tt
+thisObj :$>$ message(arg1,arg2);
+\end{quote}
+applies the member function {\em message()} to the object ``thisObj''
+with the arguments {\em arg1} and {\em arg2}.
+
+In ClassC, classes are defined by the inheritance of components from
+parent classes and an additional declaration section for components unique
+to the class being defined.
+
+A class name may be used to declare an object variable, which then represents
+a pointer to an object of that class type.  However, the object itself is not
+created until an explicit initialization call is made.
+
+For example, the declaration
+\begin{quote}
+MyClass objVariable;
+\end{quote}
+declares ``objVariable'' to be a pointer to an object of type ``MyClass''; but
+it is initialized to the NULL pointer (0).  To create a new object of type
+``MyClass'', send the message ``new()'' to ``MyClass'' ---
+\begin{quote}
+MyClass:$>$new()
+\end{quote}
+
+It is possible to  declare an object variable and initialize the object
+in one step:
+\begin{quote} \tt
+MyClass objVariable = MyClass:$>$new();
+\end{quote}
+
+Class names are also used when defining member functions.
+Since several
+classes may have member functions of the same name, the class name is
+prepended to the member function name to uniquely identify it.
+
+\subsection{Defining classes}
+A class in ClassC is defined much like a structure in C.  A class definition
+is indicated by the keyword {\bf class}, followed by the name of the class to
+be defined, an optional inheritance list of previously defined classes, and
+the body of the class definition.  The definition body is just a sequence of
+declarations in a standard C format.  This declaration set may include
+function and object declarations.
+
+The form of a class definition is thus:
+\begin{verbatim}
+
+class Class_name  : SuperClass_1  : SuperClass_2 : ...
+	{	<type> <declarator>;
+	 	<type> <declarator>;
+	 	<type> <declarator>;
+	 	<type> <declarator>;
+			.
+			.
+			.
+	};
+
+\end{verbatim}
+
+
+Three things to bear in mind about classes --
+\begin{description}
+\item[Class Definitions ---]
+No other classes, structures or typedefs may be
+{\em defined}
+within a class definition, although previously defined typedefs
+and structures may be used
+within a definition, and other classes which are defined elsewhere
+within the file (earlier or later) may be used to declare member components.
+\item[Class Names ---]
+The ``class'' keyword is used
+only on definition.  Thereafter the defined class name is used like a
+new type name.  This means that unlike structures,
+you cannot have a variable with the same name as a class.
+\item[No Unnamed Classes ---]
+Unlike
+{\em struct}
+in C, all classes must be given a name; furthermore, it is impossible to
+declare an object instance of a class
+in the same statement as the class definition.
+\end{description}
+
+{\flushleft \large \em Class Inheritance:}\\
+Classes may inherit components (data and methods) from an arbitrary number
+of antecedents.  This implies a potential conflict when the same component
+name is used in more than one ancestor.  This conflict is resolved as
+follows:
+\begin{itemize}
+\item If the conflict involves two components of the same name but of different
+declared type in two or more different ancestors, this is declared
+to be a semantic error,
+compilation is aborted and an appropriate error message is reported.
+\item If the conflict involves components of the same name and the same
+declared type in each ancestor, then the component from the parent
+earliest in the list is defaulted.
+
+This default inheritance of the component is irrelevant for
+data components, but critical for function components.  That is, if the
+same function name and type is declared in several ancestors, the first
+definition encountered when traversing the list of ancestors is the
+function definition used for the new class.
+\item
+If the conflict involves a component explicitly declared in the
+body of the current class definition and an ancestor of that new class, the
+new definition is used, which supersedes all ancestor definitions.
+This is the case even if the type of the new component declaration
+conflicts with the type declaration of a component of the same name in an
+ancestor class.
+\begin{quote}
+Note that if the user wants to supersede a function
+definition from a parent class, that function must be declared in the
+{\em body}
+of the new class as well as being redefined as described below.
+\end{quote}
+\end{itemize}
+
+\subsection{Defining class functions}
+1) {\large \em Declaration}\\
+Different classes may have member functions with the same name.
+Similarly, a derived class may redefine a function which was defined
+previously in an ancestor class.  It is therefore necessary to have a means
+to distinguish which of the several possible member functions is being defined.
+This is done with the class name and the function name joined with the
+scoping operator ``::''.  So to define the member function ``print()'' of class
+``Bishop''  which takes a char * argument ``str'' and returns an integer ---
+
+\begin{verbatim}
+	int Bishop::print( str )
+	char * str;
+	{
+		(Body of definition)
+	}
+
+\end{verbatim}
+
+
+{\flushleft 2) {\large \em Body}}\\
+The body of a member function definition is like the body of an ordinary
+function body in ClassC, except in the treatment of the
+components of the object to which the message/function is being sent.
+
+Specifically, the body of a member function definition can refer to other
+elements of the receiving object without explicitly dereferencing them.
+The appropriate dereferences
+are implicit in the function itself.  For example:
+\begin{verbatim}
+
+	class Piece
+		{ char *	name;
+		  object	position;
+		  int		checkPosition();
+		  int		show();
+		  void		move();
+		  void		report();
+				/* Send message to coordinator */
+		};
+
+\end{verbatim}
+is a declaration for the class piece.  The member function ``move()'' of class
+Piece might be defined as follows:
+
+\begin{verbatim}
+
+	void Piece::move( newPosition, board )
+	object newPosition;
+	object board;
+	{    if (checkPosition (newPosition ) )
+	     {
+		board:>atput(newPosition, self);
+	        position = newPosition;
+	      }
+	     else report ("Illegal Move");
+	}
+
+
+\end{verbatim}
+
+Note the use of the identifier
+{\em self}
+in the definition above.  Self is an object variable which is automatically
+generated by the parser as an argument to the member function.
+It represents the target object to which the function/message is being
+sent.  The variable name {\em position} used in the definition of
+{\tt Piece::move()} above is known to be a component of class Piece, and is
+therefore assumed to refer to the target object.   The statement
+\begin{quote}
+position = newPosition;
+\end{quote}
+could have been equivalently rewritten
+\begin{quote}
+self :$>$ position = newPosition;
+\end{quote}
+In general, the {\bf self} variable is used when the member function manipulates
+the
+{\em entire}
+object rather than the components of that object.
+In this case, for example, it is used to register the
+instance of the Piece class to its new position with the object {\tt board}.
+
+\subsection{Declaring and Initializing Objects}
+Objects can be declared in one of two ways:
+\begin{enumerate}
+\item By the type name {\em object}, or
+\item By the name of a class defined elsewhere in the file.
+\end{enumerate}
+When an object variable is declared by a class name, all operations
+subsequently performed on that variable are checked for conformance
+at compile time.
+That is, operations are checked to ensure that they are compatible with
+the object's declared class or ancestor classes, and the returned
+result of the message is cast to the appropriate type.
+
+Variables that are just declared to be of type
+{\tt object}
+are not subject to any class conformance checking until runtime.  Thus, any
+object operation may be applied to variables declared to be of type
+{\tt object}.
+This gives the user more flexibility in the manipulation of the object,
+but at the risk of runtime errors if the user has used the object
+incorrectly.
+
+It is suggested that use of the type name
+{\tt object}
+be restricted to such applications as collection classes, where it is desirable to
+allow objects of all types to be stored.
+
+These object type names are syntactically equivalent to
+standard C scalar type names like ``int'', ``char'', ``float'', etc.
+This means that they
+can be used not only to declare variables of type
+{\tt object},
+but arrays of, pointers to, and functions returning
+{\tt object}
+as well.  So some possible object declarations:
+\begin{verbatim}
+	object	x;
+	MyClass	y[4];
+	object	(*z)[3][7];
+	Bishop	func();
+
+\end{verbatim}
+
+A new object variable is essentially an empty slot into which an object
+may be placed.  Objects themselves are created dynamically from the heap
+at runtime by a special call or message called {\bf new()}.  The message
+``new()''
+is sent to a class name to create a new instance of that class.  This new
+instance may then be assigned to an object variable (be put in the slot).
+\begin{quote}
+Note: Classes in ClassC are not themselves objects, but are syntactically
+treated as such with the ``new()'' message.
+\end{quote}
+
+So, for example, to make a new object of class Bishop you write
+{\tt Bishop:$>$new()} where the symbol ``:$>$'' is the message passing
+or dereferencing operator of ClassC.
+
+An object variable may be initialized on its declaration line like any other
+C variable.  So, to assign the new instance of Bishop to the object variable
+{\em mypiece}
+we could write either:
+\begin{verbatim}
+	Bishop mypiece;
+	mypiece = Bishop:>new();
+\end{verbatim}
+
+or
+
+\begin{verbatim}
+	Bishop mypiece = Bishop :>new();
+\end{verbatim}
+
+It is also possible to create a special {\bf init()} function for a class
+which is automatically called when a new object of that class is created.
+The ``init()'' function is declared and defined like any other class member
+function except that it must not be declared to be of any type or return
+any value.  An ``init()'' function may be defined to take arguments,
+in which case the call to
+\begin{quote} \tt
+ClassName:$>$new(arg1,arg2,...)
+\end{quote}
+is made with the appropriate arguments.
+
+New objects created from classes that have no "init()" function associated
+with them are created with uninitialized memory.
+
+
+\subsection{Deleting Objects}
+Primitive garbage collection is performed automatically when the ClassC {\bf -G}
+compiler option is used.  The user can also explicitly delete unwanted
+objects and release their memory space to the heap.
+
+An object is deleted by sending it the message {\bf delete()} ---
+\begin{quote} \tt
+oldObj:>delete();
+\end{quote}
+
+The function ``delete()'' does not have to be declared as a component of
+an object to be used to delete an object.  It can be used to delete
+any object, and just releases the memory specifically allocated to
+that object by the call to ``new()''.
+
+It is possible, however, that some objects may have acquired additional
+memory resources.  For instance, an object may contain a pointer to a
+dynamically allocated string.  If the object is deleted without freeing
+the string, the string will remain, uncollected, floating in memory.
+
+It is thus possible to explicitly define a member function ``delete()''
+as part of a class definition.  This member ``delete()'' function is
+defined like any class member function, and the user is responsible for
+cleaning up any additional memory allocated to the object here.
+When the message ``delete()'' is sent to an object (possibly with
+arguments) the user defined member ``delete()'' function is called to
+clean up user allocated memory, then the system ``\_delete()'' function is
+called to delete the object itself.
+
+
+\subsection{Using Objects}
+There are three different ways in which object variables can be used.
+\begin{itemize}
+\item
+They can be used with the dereferencing (component selection) operator
+``:$>$'' ---\\
+e.g., {\tt mypiece:$>$position = newPosition;} or
+{\tt mypiece:$>$set(newPosition);}
+\item
+They can be used in assignment statements with other objects or functions
+returning objects;\\
+e.g., {\tt obj1 = obj2;}.
+\item
+They can be passed as arguments to functions; e.g.
+{\tt newobj = transform(oldobj);}.
+\end{itemize}
+
+
+{\large \flushleft \em Dereferencing Objects}
+
+{\flushleft Member Data:}\\
+The operator ``:$>$'' is used to dereference or select components of an
+object.  If this component is a data component, the expression
+\begin{quote} \tt
+$<$object\_name$>$ :$>$ $<$component\_name$>$
+\end{quote}
+is an l-value;  that is, the expression
+can be used on either side of the ``='' (assignment) operator.
+
+Components of a class can be of any legal C type, or a class C object.
+If the object variable has been declared with a class name, component type
+interpretation is done automatically.  This means that if object
+{\tt obj1} has been declared to be of class SampClass and component
+{\tt mycomp} is an array of floats, the assignment
+\begin{quote} \tt
+obj1:$>$mycomp [6] = 2.718;
+\end{quote}
+has the expected result.
+But as discussed above, object variables declared as type
+{\em object} (rather than as instances of previously defined class types)
+are dynamically bound and
+their type cannot be determined at compile time.  Thus, there is no
+way to determine the type of component {\tt mycomp} at compile time.
+
+{\em Example:}\\
+Consider two classes, ClassA and ClassB.  Each class has a component named
+{\tt size}.  The declaration of ``size' for class ClassB is {\tt int size;}
+for ClassA it is {\tt float size;}.  If the object variable {\tt objVar} is
+declared to be of type
+{\em object},
+it is not bound to any class type at compile time and the compiler
+has no way to know the type of the expression
+{\tt objVar:>size}.  This is resolved in the following way:
+
+\begin{itemize}
+\item
+The default return type of the ``:$>$'' operator is type {\tt object}.  Thus, if
+an object is expected, no special treatment is required.
+\item
+If an abstract declaration appears between the component selector and
+the component, the type of the expression is cast to the type of the
+abstract declaration.  The abstract declaration is basically a C cast except
+that the conversion is {\em exact}.
+That is, if the component is an array of 6 floats, the abstract declaration
+for that component MUST be ( float [6] ).  In C, the appropriate
+cast would be ( float * ); the cast ( float [6] ) is illegal in standard C.
+Similarly, if the desired component is a structure, it must be cast as the
+structure rather than a pointer to structure.  So if the expected return
+type of {\tt objVar:>size;} is float, it must be expressed as
+{\tt objVar:>(float)size}.
+\end{itemize}
+
+This interface is awkward, but
+is provided as an additional feature for the user.
+
+{\em When an object variable is declared as an instance of a particular class
+rather than with the keyword
+{\bf object},
+these conversions are performed automatically and need not be of concern to
+the user.}
+
+\subsection{Use of Member Functions}
+Member functions are accessed through the same ``:$>$'' selection operator by
+which member data are selected.  A member function can access other member
+functions within its body; in particular, member functions of a child
+can access and call functions inherited by that child from its ancestors.
+Similarly, an inherited function that references function components that
+have been redefined in the derived class will call the redefined
+{\em derived}
+class function rather than the function for which it was originally
+defined.  As with data components, function component return values
+are automatically cast to their declared types for object variables
+declared by a class name, and can be manually cast as described above
+for object variables declared by the keyword {\bf object}.
+\subsection{Object Assignment}
+Objects can be assigned to object variables through the standard C
+assignment operator ``=''.  This means a
+reference between the object variable and the object itself is
+established.  No new objects are created by this mechanism.  For example,
+if ``a'' and ``b'' are both object variables, then the assignment ``a = b;''
+does NOT duplicate the object pointed to by b.  Rather, both ``a'' and ``b'' now
+reference the same object.  Thus, any changes made to object ``b'' will be
+made to object ``a'' as well.  In order to duplicate an object, the user must
+allocate new memory and initialize it appropriately,
+usually through a member function.  For example, to create a duplicate
+of object {\tt objGen}, one might write
+\begin{quote} \tt
+AClass dupObj = objGen:>copy();
+\end{quote}
+where {\tt copy()} has been appropriately defined by the user to create,
+initialize, and return a new object.
+
+\subsection{Using the -G Garbage Collection Option}
+Garbage collection is useful for large programs that use large amounts of
+memory, or programs with repeating loops that reassign object variables
+without explicitly freeing old values.  Garbage collection is a feature
+which allows the programmer to be less rigorous when writing his/her
+program, but is costly in terms of computer resources and should be used
+judiciously.
+
+Note that when the garbage collection option is invoked, objects
+are statically scoped, and hence are not stacked in recursive function
+calls.  Note also that modules compiled with the garbage collection
+option must not be combined with other modules compiled without it.
+
+Garbage collection takes place only after a certain number of new objects
+have been allocated, and thereafter only at specified intervals.
+Both the initial threshold and the frequency can be modified from their
+default values by the user.
+
+The external integer ``CEGthreshold'' is the number of new objects that
+will be allocated before the garbage collection mechanism is called for the
+first time.  On systems with large memory, it often makes sense to allow
+this number to be quite large before trying any collection.  The value
+can be changed in any function by declaring the variable
+\begin{quote} \tt
+extern int CEGthreshold;
+\end{quote}
+and setting it to the desired value.
+
+The frequency of the collection is modifiable as well.
+{\em Frequency}
+of collection,
+{\bf CEGfrequency},
+is defined as how many calls to
+new()
+are made between collection attempts.  It is wasteful to
+collect the entire object table every time the user wants to allocate a new
+object.  After the threshold size
+CEGthreshold
+has been reached, collection takes place
+after each {\em CEGfrequency} calls to new(), where CEGfrequency is declared as
+\begin{quote} \tt
+extern int CEGfrequency;
+\end{quote}
+That is, the integer
+{\em CEGfrequency}
+represents how many calls to
+{\em new()}
+are made between each attempt at collection of the object table.
+
+Again, it is only necessary to declare the variable CEGfrequency
+if it is desired to
+modify its default value.  The value may be changed by assigning a
+new integer to it.
+
+The default value of CEGthreshold is 1000; default for CEGfrequency is 100.
+
+\subsection{Using ClassC/Elaine}
+The class definitions should in be put at the beginning of the source
+file, and should occur before any function definitions.
+
+If a large multi-file project is being developed, all class definitions
+should be made in header files which are
+{\tt \#include}'ed
+in each file that manipulates objects of those classes.  The member
+functions of each class should be defined only once, and
+can be defined in any file and linked in at
+load time.
+
+The
+{\bf ce}
+command invokes the ClassC compiler and processes command line options.
+The only options special to
+ce
+is the garbage collection option {\bf -G} and the dereferencing options
+{\bf -d} and {\bf -i} for function dereferencing and inline dereferencing,
+respectively.
+
+Other command line options implement standard cc options as described below:
+
+
+{\em ce command line options}
+\begin{description}
+\item[-O]
+Invoke the C optimizer on the output.
+\item[-o {\em name}]
+Call the executable file {\em name}.
+\item[-g]
+Compile for debugging.
+\item[-p]
+Compile for profiling.
+\item[-G]
+Create with garbage collection.
+\item[-e]
+Create .c intermediate file; do not compile into object file.
+\item[-c]
+Create object file; do not link into executable.
+\item[-l{\em libname}]
+Search the library ``lib{\em libname}.a'' for unresolved references
+when linking.
+\item[-i] inline dereferencing
+\item[-d] deref --- function dereferencing
+\end{description}
+
+Use the ``-c'' option and the
+Unix ``ar'' library archive command to build ClassC libraries.
+
+\subsection{Keywords and special symbols}
+\begin{verbatim}
+
+:>		--	Class dereference operator
+::		--	Class scoping operator
+:		--	Inheritance operator
+//		--	ClassC inline comment operator
+class		--	Class definition keyword
+object		--	Object type name
+self		--	Target object in member function definition
+_deref		--	ClassC library dereference function
+_new		--	ClassC library object creation function
+__new		--	ClassC library object creation function
+_decRef		--	ClassC library reference count decrement
+_incRef		--	ClassC library reference count increment
+_delete		--	ClassC library delete function
+
+\end{verbatim}
+
+\subsection{Examples of ClassC programs}
+See appendices.
+%\clearpage

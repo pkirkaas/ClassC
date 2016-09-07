@@ -1,0 +1,532 @@
+
+.ls 2
+
+.DS
+
+figure 1
+
+struct Employee
+    {	int	ID;
+	char *	name;
+	struct date hireDate;
+		.
+		.
+		.
+    }	;
+
+.DE
+
+
+
+
+
+
+
+.DS
+figure 2
+
+class Father
+    {	int	a;
+	int	b;
+    }	;
+
+
+class Son1 : Father
+    {	float	q;
+    }	;
+
+.DE
+
+
+
+
+
+
+
+.DS
+figure 3
+
+Father myFather;
+Son1	mySon;
+mySon.b = 5;
+myFather = mySon;
+print myFather.b;
+
+.DE
+
+
+
+
+
+
+
+.DS
+figure 4
+
+struct Father
+    {	int	a;
+	int	b;
+    }	;
+
+.DE
+
+
+
+
+.DS
+figure 5
+struct Son1
+    {	int	a;
+	int	b;
+	float	q;
+    }	;
+
+.DE
+
+
+
+.DS
+figure 6
+
+class Mother
+    {
+	int	Y;
+	int	Z;
+    }	;
+
+
+class Son2 : Father : Mother
+    {
+	float	r;
+    }	;
+
+.DE
+
+
+
+
+.DS
+figure 7
+
+
+Is it (A)
+
+struct Son2
+    {
+	int	a;	/* From Dad */
+	int	b;	/* From Dad */
+	int	Y;	/* From Mother */
+	int	Z;	/* From Mother */
+	float	r;
+    }	;
+
+or (b)
+
+struct Son2
+    {
+	int	Y;	/* From Mother */
+	int	Z;	/* From Mother */
+	int	a;	/* From Dad */
+	int	b;	/* From Dad */
+	float	r;
+    }	;
+
+.DE
+
+
+
+.DS
+figure 8  
+
+
+class UniversityMembers
+    {
+	char *	name;
+	int	DateOfBirth;
+	void	printStats();
+    }	;
+
+class Student : UniversityMembers
+    {
+	int	StudentID;
+   	float	GPA;
+	void	printStats();
+    }	;
+
+class Employee : UniversityMembers
+    {
+	int	EmployeeID;
+	int	Salary;
+	void	printStats();
+    }	;
+
+class GradAsst : Student : Employee
+
+.DE
+
+
+
+
+figure 9
+
+
+.ce
+UniversityMembers
+
+
+
+
+
+.ce
+Student			Employee
+
+
+
+
+
+.ce
+GradAsst
+
+
+
+
+
+
+
+.DS
+figure 10
+
+struct GradAsst
+    {
+	char *	name;
+	int	dateOfBirth;
+	int	StudentID;
+   	float	GPA;
+	int	EmployeeID;
+	int	Salary;
+    }	;
+
+.DE
+
+
+
+
+
+.DS
+figure 11
+
+class Ship
+    {
+	int	size;
+	int	position;
+	int	move();
+    }	;
+
+
+.DE
+
+
+
+
+
+.DS
+figure 12
+
+
+struct _ref_el
+    {
+	char * name; 
+	int offset; 
+    };
+
+
+.DE
+
+
+
+
+
+
+.DS
+figure 13
+
+static struct _ref_el _ShipArr [] =
+    { 
+	{ "size",	(int)&((struct Ship * ) 0) ->size },
+	{ "position",	(int)&((struct Ship * ) 0) ->position },
+	{ 0 , 0 },
+	{ "_name" , (int)"Ship" },
+	{ "move",	(int) _Ship_move },
+	{  0 , 0 }
+    };	
+
+
+.DE
+
+
+
+
+
+
+.DS
+
+figure 14
+
+struct Ship
+    {
+	struct _ref_el * _ref_arr;
+	int	size;
+	int	position;
+    }	;
+
+
+
+.DE
+
+
+
+
+
+
+.DS
+
+figure 15
+
+Ship	myShip;		/* myShip is declared to be an instance of Ship */ 
+myShip = Ship:>new();	/* myShip is initialized */
+myShip :> position = 75024;
+
+
+.DE
+
+
+
+
+
+
+.DS
+figure 16
+
+* (int *) _deref(myShip, "position") = 75024;
+
+.DE
+
+
+
+
+
+.DS
+figure 17
+
+class StorageFacility
+    {
+	char *	contents;
+	int	capacity;
+	int	position;
+	int	load();
+    }	;
+
+class CargoShip : StorageFacility : Ship
+    {
+	char *	HomePort;
+    }	;
+
+.DE
+
+
+
+
+
+
+
+.DS
+
+figure 18
+
+struct CargoShip
+    {
+	struct _ref_el * _ref_arr;
+	char *	contents;
+	int	capacity;
+	int	position;
+	int	size;
+	char *	HomePort;
+    }	;
+
+
+.DE
+
+
+
+
+
+.DS
+
+figure 19
+
+class Shape
+    {
+	int volume();
+    }	;
+
+
+class Cube : Shape
+    {
+	int	lengthOfSide;
+	int	volume();
+    }	;
+
+class Sphere : Shape
+    {
+	int	radius;
+	int	volume();
+    }	;
+
+class Pyramid : Shape
+    {
+	int	height;
+	int	lengthOfBase;
+	int	volume();
+    }	;
+
+
+
+.DE
+
+
+
+
+
+
+.DS
+figure 20
+int Cube::volume()
+{ return lengthOfSide * lengthOfSide * lengthOfSide ; }
+
+int Sphere::volume()
+{ return 4 * 3.14159 * radius * radius * radius / 3; }
+
+int Pyramid::volume()
+{ return height * lengthOfBase * lengthOfBase / 4 ; }
+
+
+.DE
+
+
+
+
+
+
+.DS
+
+figure 21
+
+
+int _Cube_volume(self)  int self;
+{ return (*(int  *)_deref(self, "lengthOfSide")) *
+         (*(int  *)_deref(self, "lengthOfSide")) *
+         (*(int  *)_deref(self, "lengthOfSide")) ;
+}
+
+int _Sphere_volume(self)	int self;
+{
+	.
+	.
+	.
+}
+
+etc.
+
+
+.DE
+
+
+
+
+
+
+
+.DS
+
+figure 22
+
+static struct _ref_el _CubeArr [] =
+    { 
+	{ "lengthOfBase", (int)&((struct Cube * ) 0) ->lengthOfBase },
+	{ 0 , 0 },
+	{ "_name" , (int)"Cube" },
+	{ "volume",	(int) _Cube_volume },
+	{  0 , 0 }
+    };	
+
+
+.DE
+
+
+
+
+
+.DS
+
+figure 23
+
+board:> (int [8][8]) field
+
+.DE
+
+
+
+
+
+
+.DS
+
+figure 24
+
+* (int * [8][8] ) _deref(board, "field")
+
+
+.DE
+
+
+
+
+
+
+.DS
+
+figure 25
+
+objectVariable:>_name
+
+
+.DE
+
+
+
+
+
+.DS
+
+figure 26
+
+* _decref (&a ) = _incref (b)
+
+
+.DE
+
+
+
+
+
+
+.DS
+
+figure 27
+
+*_decref( &a ) = _incref (* _decref (&b ) = _incref (c) )
+
+
+.DE
+
+

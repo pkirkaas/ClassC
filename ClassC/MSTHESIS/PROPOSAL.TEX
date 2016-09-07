@@ -1,0 +1,509 @@
+
+
+Thesis Proposal for:
+
+.ce
+.I ClassC/Elaine
+
+.ce
+A Multiple Inheritance C-based Object Oriented Language
+
+
+Paul Kirkaas
+
+.ce
+.I "Table Of Contents"
+.bp
+.H 1 "Introduction"
+
+ClassC is a C-based object oriented programming language.  The language
+adds object oriented capabilities to the C programming language.
+Specifically, ClassC adds the new data type
+.I object
+, and the new aggregate declaration,
+.I class.
+Class definitions are like C
+structures except they may contain function declarations, and they may
+inherit components from multiple ancestors.  Objects are instances of
+a particular class.
+
+.I Elaine
+is the programming environment for ClassC.  Initially it
+consists of the runtime library functions necessary to implement
+ClassC; enhancements will be added over time.
+
+There are other C-based object oriented languages, such as C++ and
+Objective-C, but these languages are more traditional than ClassC.  ClassC
+differs from these other languages in two points.
+
+  1) ClassC provides multiple inheritance, which is very commonly
+discussed in the description of object oriented languages, but very
+rarely actually implemented.
+
+  2) ClassC objects are typeless and dynamically bound -- that is, any
+variable of type
+.I object
+may be assigned any class instantiation.  This is typical of interpreted
+languages like lisp and smalltalk, but rare in compiled languages like
+.I C
+and
+.I Pascal,
+etc.
+
+.H 1 "Motivation"
+
+Object oriented programming is a way to abstract data and
+control.  It allows the programmer to create models that are internally
+complex and sophisticated, yet which present a simple and uniform interface
+to the user.  There are two broad arguments for Object Oriented
+programming.
+
+The first is that Object Oriented programming
+improves productivity and reliability by allowing the reuse of code and the
+standardization of common data types and operations.
+
+The second argument is that by allowing greater abstraction, object
+oriented languages are continuing the trend in programming languages
+towards a more human like and less machine like means of expressing
+concepts.  This implies that object oriented programming can facilitate
+not only bigger programs, but cleverer ones as well.  This is my primary
+interest.
+
+The goal of ClassC/Elaine, then, is to provide a usable C based object
+oriented language that offers an alternative to previous implementations.
+Most of the code executed in any program is straight forward and does not
+benefit from an object oriented approach ( e.g, for-loops, arithmetic
+operations, etc).  This code should be implemented as efficiently as
+possible for rapid execution.  This is the motivation for using C as the
+base language.  Object type data manipulations should be used for operations
+which are conceptually intricate, where use of object oriented techniques
+could give both the programmer and the program more clarity and
+expressiveness.  This is the motivation for enhancing C with object oriented
+features; moreover, this is the reason for giving ClassC a higher level of
+abstraction that C++ or ObjectiveC through multiple inheritance
+and untyped objects.
+
+In order to be genuinely useful, ClassC should be compatible with current
+C language facilities.  It should be compatible with all existing standard
+.I "#include"
+files, as well as all library packages.  It should allow separate
+compilation and linking of ClassC modules, and should allow the user
+to create his/her own ClassC libraries.
+
+.H 1 "Background"
+
+The foundations of Object Oriented programming were laid by the
+programming language Simula, which was developed in Norway in the early
+1960's[XXX].  It introduced the concept of user defined classes, and was
+developed as a simulation language for modeling complex systems.
+The power of this concept was not widely recognized until Alan Kay and the
+research group at Xerox PARC developed the Smalltalk interactive
+environment[GOL83].  It evolved from Dr. Kay's concept of a computer called the
+Dynabook, which would be very user friendly and suitable as a learning
+aid for children.  Smalltalk remains to this day the prototypical example of
+an object oriented language.  It is a rich and complex environment that
+shows the power of the object oriented concept.
+
+Yet this richness and complexity has a price.  Smalltalk is big, slow,
+expensive, and available on very few machines.  It's primary drawback from a
+systems development perspective is its slowness.  Smalltalk runs on a
+virtual machine / interpreter, which is inappropriate for software
+systems.  This is unfortunate, because software systems are classic
+candidates for the productivity benefits of object oriented programming.
+Concepts like queues, stacks, hash tables, etc. are ideal abstraction
+types.  But an operating system written in Smalltalk running on conventional
+hardware would be very slow.
+
+Enter C++ [STR86].
+C++ was developed at Bell Labs, home of Unix, C, Kernighan and
+Ritchie.  It was developed by Bjarne Stroustrup with the intent of giving as
+much object oriented structure to C as possible, while making no sacrifice of
+the efficiency of pure C code.  It is therefore perhaps the best system
+development language available today.
+
+Objective-C is a language developed by Dr. Brad Cox at Productivity
+Products International and seems much like
+C++ with a different syntactic structure.
+The two languages offer similar features [COX86].
+
+
+.H 1 "Project Description"
+
+My concept for ClassC differs from those of other C-based object oriented
+languages.  I am interested in developing a language that is a
+learning tool for data abstraction and object oriented programming
+concepts.
+
+Consequently, I emphasize the object oriented flavor at the sacrifice of
+some efficiency.  This philosophy is reflected in the decision to provide
+multiple inheritance and dynamic binding of objects.  There is some runtime
+cost to provide these features, mainly function call overhead.
+
+ClassC will be a superset of C; that is, all C operations are supported by
+ClassC, and pre-existing library and object files as well as standard
+header files will all be compatible with ClassC.
+
+The language will be developed in a Unix operating system environment, using
+the Unix language development tools.  The parser will accept standard C code
+and pass it to the output file unchanged.  It will need to maintain symbol
+tables and scoping information and build a parse tree, however.
+
+In addition to standard C, the parser accepts and processes the following:
+.AL
+.LI
+The aggregate definition
+.I class-
+.br
+A class declaration is much like a standard C structure declaration.
+A class is composed of
+.I Members;
+of which there are two types:
+.AL a
+.LI
+.I "Variable"
+ members-
+.br
+which are passive data components of the class instances.
+.LI
+.I "Function"
+members-
+.br
+which are functions that act on the private member variables of class instances.
+
+.LE
+In addition,
+a class definition may contain a list of parent classes from which
+components (variable and function) are inherited.
+.LI
+The class member function definition-
+.br
+Different classes may have member functions with the same name; e.g.,
+.I print.
+To distinguish them, class member functions are defined using the class name
+and a scoping operator.
+.LI
+Objects-
+.br
+All objects are dynamically allocated at runtime by explicit calls to
+a
+.I 'new()'
+function.
+A variable of type
+.I object
+is really an index into an object table.
+An object may be declared in one of two ways:
+.AL
+.LI
+With a class name-
+.br
+Class names are used to declare object variables.  Object variables declared
+this way can only represent objects of that particular
+class type or its descendants.
+.LI
+With the type specifier
+.I object-
+.br
+A variable declared with the type specifier
+.I object
+can be used to represent any type of object instance at all.
+.LE
+.LI
+The object member dereference-
+.br
+The member dereferencing operator used in ClassC is ":>".
+C++ uses the ordinary C structure dereferencing operators for object
+dereferencing, but the dereferencing mechanism in ClassC is implemented
+differently and suggests the use of a separate symbol.
+.LI
+Variable declarations-
+.br
+Variable declarations can be made anywhere in a block.
+This is intended to more closely associate the variable declaration
+with its use.  Every variable must still
+be declared
+.I before
+its first use.
+.LE
+
+.H 1 "Functional Overview"
+
+.I Classes:
+.br
+A class is declared as follows:
+.DS
+class <Class_name>  : <SuperClass_1>  : <SuperClass_2> : ...
+	{	<type> <declarator>;
+	 	<type> <declarator>;
+	 	<type> <declarator>;
+	 	<type> <declarator>;
+			.
+			.
+			.
+	};
+
+.DE
+where
+.I SuperClass es
+are optional and separated by the inheritance operator ":"; and where
+.I declarator
+is any type of legal ClassC declarator, including a function
+or a class object.
+
+A special type of
+function that may be declared as a class member is
+.I init().
+.I init()
+is that class's initializer function.  The init() function is defined by
+the user and is automatically invoked when an
+object of that class is created.  Otherwise, if init() is not declared,
+uninitialized memory space will be allocated.
+
+.I Objects:
+.br
+Objects are created dynamically from the heap; there are no static objects.
+Each object is an instance of a specific class.
+A member of an object (the member can be either variable or function)
+is dereferenced by the object dereferencing operator ":>".  The general
+form of the object dereference is:
+.br
+"<objectExpression> :> <memberName>;";
+.br
+where "objectExpression" is usually just a variable name.  In general,
+however, an object expression can also be the result of a pointer
+dereference, a return value from a function, etc.
+The type of the entity returned by the object dereferencing operator is
+determined by the type of the object expression.  If the class to which
+the object
+expression belongs can be determined at compile time, the
+type of the returned dereferenced element is determined by its type as
+declared in the class definition.
+
+If, however, the object expression evaluates to an instance of the
+generic class
+.I object,
+its true class cannot be determined at compile time.  In this
+case the type of the result of the dereference is defaults to
+.I object
+as well.  The programmer can cast the result to be of
+any type and override the default.
+
+.I "Member Functions:"
+.br
+Member functions are defined with the class name, scoping operator "::", and the
+function name -- e.g, "Son::print()".   Arguments are declared just like in
+an ordinary C function definition.  An object member function can reference
+the other
+member variables or functions
+of that same object with no special dereferencing or casting
+required.  A reference to "self" is passed automatically on a call to a
+member function, and may be used explicitly by the programmer
+in an object's member function definition to
+reference the object itself.
+
+
+.br
+
+Examples:
+
+Declare class
+.I Son
+to be a descendant of classes
+.I Papa
+and
+.I Mama.
+
+.DS
+	class Son : Papa : Mama
+		{ int a;
+		  char * b;
+		  init();	/* Optional initialization function */
+		  void print();
+		};
+.DE
+
+Define member function init() of class Son:
+.DS
+
+	Son::init(x,y)	int x; char * y;
+	{ b = (char *) malloc(strlen(y) + 1);
+	  strcpy (b,y);
+	  a = x;
+	}
+.DE
+
+Declare an object & initialize to be of class Son:
+
+.DS
+	Son xmpl = Son:>new(5,"Hello");
+.DE
+
+Send the message "print" to xmpl:
+
+	xmpl:>print();
+
+Reset member element "b" of xmpl:
+
+	xmpl:>b = "Goodbye"
+.bp
+
+.H 1 "System Description"
+
+The ClassC/Elaine compiler will be developed under Unix using the Unix
+lexical analyzer
+.I Lex
+and the Unix parser generator
+.I Yacc,
+and will use the standard Unix/C libraries.  The final system will consist
+of three files-
+.AL
+.LI
+The parser
+.Iefront-
+.br
+The ClassC/Elaine front end parser, written in C.  The parser will translate
+ClassC/Elaine .e source files into .c C language files.
+.LI
+The Unix Shellscript
+.I ce-
+.br
+The shellscript
+.I ce
+is the compiler command invoked by the user.  It parses the command line
+options and source files, applies the appropriate version of the parser
+and runtime library, and calls the C compiler cc on the result.
+.LI
+The ClassC/Elaine runtime routines,
+.I libce.a.
+.br
+libce.a contains runtime functions such as _new(), _deref(), etc.
+.EL
+.H 1 "Implementation Plan"
+.H 2 "Deliverable Items"
+.AL
+.LI
+Compiler-
+.br
+Working ClassC compiler, runtime routines, and source code.
+.LI
+Programming Guide-
+.br
+A description of the language and how to use it.
+.LI
+Implementation Guide-
+.br
+A description of how the compiler works and what it does.
+.LI
+Project Report-
+.br
+A discussion of the history, goals, and results of the project.
+.EL
+.H 2 "Completion Criteria"
+The ClassC/Elaine language project shall be considered complete when
+code written in the ClassC language as specified above can be successfully
+compiled and executed.  Two programs, "ChessGen" and "BackPropigation", will
+be written in ClassC code to test the functionality of the language.
+"ChessGen" generates legal chess moves for specified chess pieces on
+a chess board (it does not
+.I play
+chess).  "BackPropigation" simulates a neural learning network.  These two
+simulations were chosen because both game pieces and neurons typify the
+sort of abstract entities for which object oriented languages are suited.
+In particular, these programs will test the following features of ClassC/Elaine:
+
+.AL
+.LI
+Use of class member functions and data.
+.LI
+Redefinition of member functions in derived classes.
+.LI
+Multiple Inheritance.
+.LI
+Statement/Declaration mixing.
+.LI
+Structure and Array components of objects.
+.LI
+Multiple levels of object dereference (i.e., obj1:>obj2:>obj3:> ... )
+
+.LE
+
+.H 2 "Completion Schedule"
+The ClassC/Elaine project will be complete by 31 May 88.
+.H 1 "Qualifications"
+.H 2 "Professional"
+I worked for Hughes Aircraft for four years on computer hardware and
+software projects, including two years on assignment in South East Asia.
+.H 2 "Academic"
+I have no undergraduate computer science education.  At RIT I have taken:
+.AL
+.LI
+ICSS 709	Programming Language Theory
+.LI
+ICSS 720	Computer Architecture
+.LI
+ICSS 745	Data Communication and Networks II
+.LI
+ICSS 706	Foundations of Computing Theory
+.LI
+ICSS 781	Introduction to Artificial Intelligence
+.LI
+ICSS 809	Operating Systems I
+.LI
+ICSS 810	Operating Systems II
+.LI
+ICSS 850	Computability
+.LI
+ICSS 851	Computational Complexity
+.LI
+ICSS 890	Seminar - Speech Processing
+.LI
+ICSS 899	Independent Study - Design of Activity Coordinator
+.EL
+.H 2 "Books and Articles"
+-- See bibliography (following) --
+.H 2 "Previous Investigation"
+I have examined the concepts involved in this project and have written
+a prototype.
+.H 1 "Grading Criteria"
+The compiler should be evaluated on how closely it succeeds in implementing
+the described language design.  The other deliverable items (Programming
+Guide, etc.) should be graded on their clarity and completeness.
+.H 1 "Bibliography"
+
+.AL
+.LI "[AHO86]"
+Aho,A.; Sethi,R.; Ullman,J. [1986]
+.I "Compilers - Principles, Techniques, and Tools"
+Reading, MA: Addison-Wesley
+.LI "[BUD87]"
+Budd, Timothy [1987],
+.I "A Little Smalltalk",
+Reading, MA: Addison-Wesley
+.LI "[COX86]"
+Cox, Brad [1986],
+.I "Object Oriented Programming - An Evolutionary Approach"
+Reading, MA: Addison-Wesley
+.LI "[GOL83]"
+Goldberg,Adele; Robson, David [1983]
+.I "Smalltalk-80: The Language and its Implementation"
+Reading, MA: Addison-Wesley
+.LI "[HAR84]"
+Harbison, Samuel; Steele, Guy [1984],
+.I "C: A Reference Manual"
+Englewood Cliffs, NJ: Prentice Hall, Inc.
+.LI "[PRA84]"
+Pratt, Terrence [1984]
+.I "Programming Languages - Design and Implementation"
+Englewood Cliffs, NJ: Prentice Hall, Inc.
+.LI "[STR86]"
+Stroustrup, Bjarne [1986],
+.I "The C++ Programming Language,"
+Reading, MA: Addison-Wesley
+.TC
+
+An object variable may be declared by a class name,
+in which case it must represent only objects of that class or descendants
+of that class, or an object variable may be declared by the keyword
+.I object,
+in which case it can be used to represent any type of object in
+the system with no type checking.
+

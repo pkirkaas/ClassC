@@ -1,0 +1,137 @@
+\s12
+
+.ce
+Rochester Institute of Technology
+.ce
+School of Computer Science and Applied Technology
+
+
+\s15
+.ce
+.B "ClassC/Elaine:"
+
+.ce
+.I "A Multiple Inheritance Object Oriented C Language"
+\s12
+
+
+.ce
+by
+.ce
+Paul Kirkaas
+
+
+A thesis submitted to the faculty of the School of Computer Science and
+Technology in partial fulfillment of the requirements for the degree of
+Master of Science in Computer Science.
+
+Approved by:
+
+
+__________________________________________________________
+.br
+Dr James Heliotis
+
+
+
+__________________________________________________________
+.br
+Dr Andrew Kitchen
+
+
+
+__________________________________________________________
+.br
+Ex Officio Committee Member
+.bp
+
+
+
+
+
+
+
+
+
+
+
+
+
+.ce
+.I "ClassC/Elaine:"
+.ce
+.I "A Multiple Inheritance Object Oriented C Language"
+
+
+.ce
+by Paul Kirkaas
+
+
+
+
+
+
+
+
+
+I, Paul Kirkaas, hereby grant permission to the Wallace Memorial Library of
+RIT to reproduce my thesis in whole or in part provided the source is
+credited.  Any reproduction will not be commercial use or profit.
+
+
+
+
+
+
+
+
+________________________________________
+
+Paul Kirkaas
+
+12 September 1988
+.bp
+
+
+
+
+.ce
+.I ABSTRACT
+
+.ls 1
+Object oriented programming is a way of abstracting information and
+operations to make programming more efficient and reliable.
+.I C
+is a non object oriented programming language that has become a de facto
+language standard in academic and industrial applications because of its
+power and flexibility.  ClassC is an attempt to add object orientation
+on the existing framework that C provides.
+Specifically, ClassC adds the new data type
+.I object
+, and the new aggregate declaration,
+.I class.
+.br
+        ClassC differs from other C-based object oriented languages such as C++
+Objective-C in three points:
+  1) ClassC provides true multiple inheritance, which is very commonly
+discussed in the description of object oriented languages, but very
+rarely actually implemented.
+  2) ClassC provides both strict type checking on objects
+as well as typeless dynamic binding -- a variable of type
+.I object
+may be assigned any class instantiation.  Dynamic binding is
+typical of interpreted
+languages like lisp and Smalltalk, but rare in compiled languages like
+.I C
+and
+.I Pascal,
+etc.
+  3) ClassC offers automatic garbage collection of memory no longer
+referenced by any object variables.
+        ClassC/Elaine is intended to be a flexible system that
+allows programmers to
+explore different qualities of object oriented programming, including strong
+and weak type checking, and single and multiple inheritance. This thesis is
+a description of the background, design, and implementation
+of the ClassC language.
+.ls 2

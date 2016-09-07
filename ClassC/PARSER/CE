@@ -1,0 +1,105 @@
+#            %M%    %I%  %H%  %G%
+PARSEOPT=
+CCOPT=
+CPPOPT=
+NOCC=
+OFILE=
+CFILE=
+EFILE=
+CCLIB=
+CELIB=$HOME/bin/libce.o
+PFLAG=0
+for S in $*
+    do
+    case $S in
+	-D*) 
+		     PARSEOPT=" $PARSEOPT $S"
+	    ;;
+	-*) 
+	    if expr "$S" : '-.*G.*' > /dev/null
+	    then
+		     PARSEOPT=" $PARSEOPT -garb"
+	    fi
+	    if expr $S : '-.*e.*' > /dev/null
+	    then
+		    NOCC=1
+	    fi
+	    if expr $S : '-.*d.*' > /dev/null
+	    then
+		    PARSEOPT=" $PARSEOPT -funcderef"
+	    fi
+	    if expr $S : '-.*i.*' > /dev/null
+	    then
+		    PARSEOPT=" $PARSEOPT -inlinederef"
+	    fi
+	    if expr $S : '-.*g.*' > /dev/null
+	    then
+		    CELIB=$HOME/bin/libceDB.o
+		    PARSEOPT=" $PARSEOPT -debug"
+	    fi
+	    ;;
+	*.c)
+		CFILE="$CFILE $S"
+	    ;;
+	*.o)
+		OFILE="$OFILE $S"
+	    ;;
+	*.e)
+		EFILE="$EFILE $S"
+		FILE=`expr $S : '\(.*\)\.e'`
+		CFILE="$CFILE $FILE.c"
+	    ;;
+    esac
+    done
+for OPT in $*
+    do
+    case $OPT in
+	-o)
+	    ;;
+	-d) 
+	    ;;
+	-G) 
+	    ;;
+	-l?) CCLIB="$CCLIB $OPT"
+	    ;;
+	-*G*) CCOPT="${CCOPT}`expr $OPT : '\([^G]*\)'`"
+	    CCOPT="${CCOPT}`expr $OPT : '[^G]*G\([^G]*\)'`"
+	    ;;
+	-*d*) CCOPT="${CCOPT}`expr $OPT : '\([^d]*\)'`"
+	    CCOPT="${CCOPT}`expr $OPT : '[^d]*d\([^d]*\)'`"
+	    ;;
+	-*)    CCOPT="$CCOPT $OPT"
+	    ;;
+    esac
+    done
+
+while [ -n "$2" ]
+do
+    if [ "$1" = "-o" ]
+    then
+	CCOPT="$CCOPT -o $2"
+    fi
+    shift
+done
+
+	
+for F in $EFILE
+    do
+	     echo "parse $F $PARSEOPT"
+	     if ceparser $F $PARSEOPT
+	     then
+# (find a null action)	echo \\c
+		.
+	     else
+		echo "Parse of $F failed."
+		exit 1
+		NOCC=1
+	     fi
+    done
+if [ "$NOCC" != "1" ]
+then
+		CC="cc $CCOPT $OFILE $CFILE $CELIB $CCLIB"
+		echo $CC
+		$CC 2>&1|egrep -v '& before array or function: ignor|not reach'
+fi
+exit 0

@@ -1,0 +1,20 @@
+chsg:	Board.o List.o Object.o Piece.o Set.o chsg.o
+	CC -p List.o Board.o Object.o Set.o Piece.o chsg.o -o chsg
+
+Board.o: Board.C Board.h Object.h Set.h
+	CC -c -p Board.C
+
+List.o: List.C List.h Object.h
+	CC -c -p List.C
+
+Object.o: Object.C Object.h
+	CC -c -p Object.C
+
+Piece.o: Piece.C Piece.h Board.h Object.h
+	CC -c -p Piece.C
+
+Set.o:   Set.C Set.h List.h
+	CC -c -p Set.C
+
+chsg.o: chsg.C Object.h Piece.h Board.h
+	CC -c -p chsg.C

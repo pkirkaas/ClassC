@@ -1,0 +1,168 @@
+
+
+
+Inline dereferencing of object components for ClassC:
+
+Objects variables in ClassC are really integers which index into 
+an object table.  Each entry in the object table contains information
+about that object, such as a pointer to the actual data object itself.
+
+In the original version of ClassC, object member dereferencing was done
+by a C function call.  A table was created for each class which 
+listed name/offset pairs.  A pointer to the appropriate class table
+was included as one field in each object table entry.  When an object
+member was referenced, the member name and class table pointer was
+given to the deref() function, which searched through the table with
+the member name as and index, and returned the associated offset.
+
+This is an effective dereferencing mechanism, but rather slow, as it
+involves a function call and linear table search for every object
+dereference.
+
+The inline dereferencing mechanism avoids both the function call 
+as well as table search overhead as follows:
+
+A list of all member names is made for each class.
+
+The member names are hashed as indices into a table of size N
+(where N is the smallest power of two greater than the number of
+members in the class being processed).  The names are hashed by
+calling the function "string-to-unsigned-long()" with the member
+name as an argument.  The value returned is an unsigned long
+integer generated from the characters of the name string.  There are
+over 4 billion possible values, and so the integer returned is
+likely to be unique for every name.
+This long integer is then masked by the value N-1 to produce
+the desired hash index value < N.
+
+If there is a collision, the table size is doubled, and the names rehashed.
+
+If there is another a collision, the table size is doubled again.
+
+This is repeated until:
+
+1)	No collisions occur.
+
+	or
+
+2)	Table size exceeds 16*N.
+
+
+If the table size exceeds 16 times the number of members in the class, a
+warning message is sent to the user and compilation is stopped.
+The warning message indicating that the table has grown
+too large and the name of the class and member on which collision has
+occurred.  The user can then change the name slightly to avoid the collision.
+This occurrence is rare, but prevents runaway table sizes.
+
+Each class then has an array of offsets associated with it, where the
+number of elements in the array is no more that 16 times the number of
+members in the class.  The elements of the array are the offsets of
+the class members.  The array is thus a sparse hash table with no
+collisions.
+
+A pointer to the appropriate array is included as a field in each
+object table entry, as well as a mask value determined by the size of the
+array (mask = arraySize^2 - 1 ).
+
+An object member dereference is now fairly efficient.  Each member
+name is hashed into an integer at compile time, saving runtime
+string manipulations.
+
+Note that the integer to which a member name is converted is not
+dependent on the class of the object to which the member belongs.
+That is, the the number depends on the letters of the member name
+string alone, and the class to which the member belongs NEED NOT
+be known at compile time.  A unique (or rather, class-specific)
+index is produced at runtime by ANDing the integer with a mask
+value stored in the object table which IS dependent on the
+object type (class).  This combines the advantage of doing
+the hard work at compile time (thus saving execution time for
+the running code) with the flexibility of not determining the true
+hash index until runtime, allowing dynamic binding (that is, the type
+(class) of the dereferenced object need not be known until run time).
+
+So the result of the member name hash is ANDed at runtime with the appropriate
+mask value (as found in the object table entry) and then used as an index
+into a table (the address of which is also found in the object table
+entry) which returns the byte offset of the object member sought.
+
+Example:
+
+E source code:
+
+myObject:>memval = 6
+
+Is converted to the resultant C code for --
+
+Old style function dereference:
+
+(*(int  *)_deref(myObject , "memval")) = 6; 
+
+	Explanation:
+	The object table index, "myObject", and member name "memval" are
+	passed to the function "_deref()", which returns a pointer 
+	which is cast to as a pointer to integer and then dereferenced.
+
+New & Improved Inline dereference:
+
+(*(int  *) ((_objV[1]=_objTbl+ myObject )->self+ _objV[1]->
+    hofV[/* "memval" */ 0xa5d05bf4 &_objV[1]->hashV])) = 6;
+
+	Explanation:
+	_objTbl is the base pointer of the object table.
+
+	_objV[1] is the pointer to the desired entry of the object
+	table obtained by adding the object index (myObject) to the
+	base, _objTbl.
+
+	"self" is the pointer to the object data in memory.
+
+	"hofV" is the pointer to the table of offsets for the class.
+
+	0xa5d05bf4 is the number that "memval" is hashed to.
+
+	"hashV" is the mask ANDed to 0xa5d05bf4 to get the appropriate index
+	into the table "hofV"
+
+	All this returns an address in memory which is cast as a pointer to
+	integer and then dereferenced.
+
+
+The first form (using the _deref() function) is somewhat more readable.
+The second form is much faster.
+
+
+Why double the table size every time there is a collision?
+Another alternative would be to increment the table size rather than
+double it.  The masking operation could be replaced by a mod (remainder)
+operation.  This would result in much more compact tables.
+
+This is an alternative.  The arguments against it are as follows:
+
+1) Mod'ing is much slower than masking.  Although it is represented as
+    a basic operation in C, equivalent to addition or masking, it is
+    actually implemented as a multi-step assembly language routine
+    in most computer systems.
+
+2) The space used in the sparse hash tables is not particularly significant.
+    Recall that the tables are created not for each object, but one for each
+    class.  If we estimate the average table sparseness to be 1/8 and the
+    offset to be a 2 byte short integer, then each class member will take up
+    an average table space of 16 bytes.  If we assume that the average 
+    member name is 8 characters long, then with the old function call
+    dereferencing mechanism, each class member took an average table space
+    of 10 bytes.  If we multiply these numbers by the expected number
+    of classes and members per class in a system, we see that the table
+    space taken by either method is not a significant portion of the 
+    run time memory usage of an application program.
+
+
+
+This description only discussed object data members.  Object function
+members are dealt with similarly, having separate hash tables of
+absolute function addresses rather than relative offsets.
+
+
+
+
