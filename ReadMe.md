@@ -3,7 +3,7 @@ ClassC is a legacy multiple-inheritance C-based Object Oriented language, based 
 
 Syntactically, ClassC is somewhere between Java & C++, with multiple inheritance. 
 
-It is a compiled language - using LEX & YACC to first compile to "C", then whatever C compiler you have to compile down to machine code.
+It is a compiled language - using LEX & YACC to first compile to "C", then whatever C compiler you have to compile down to machine code. It was subsequently adapted as a backbone to a NATO defense project, but I'm not allowed to release that version.
 
 ClassC is not maintained, but is a useful reference for building tokenizers and compilers, and how to abstract classes/objects in a computer language.
 
